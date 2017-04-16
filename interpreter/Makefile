@@ -11,10 +11,10 @@ OBJ:=$(SOURCE:.java=.class)
 .DEFAULT : $(PROJECTNAME).jar
 
 $(PROJECTNAME).jar : $(OBJ)
-	$(JAR) $(JARFLAGS) $@ Manifest.txt $(OBJ)
+	$(JAR) $(JARFLAGS) $@ Manifest.txt *.class
 
 %.class : %.java
-	$(JAVAC) $(JAVACFLAGS) $<
+	$(JAVAC) $(JAVACFLAGS) *.java
 
 .PHONY : clean scrub
 

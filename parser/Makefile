@@ -24,6 +24,7 @@ $(JARNAME) : $(GRAMMAR)
 clean :
 	rm -f *.class
 	rm -f *.java
+	rm -f *.tokens
 
 scrub : clean
 	rm -f $(JARNAME)
