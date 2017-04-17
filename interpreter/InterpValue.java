@@ -60,7 +60,7 @@ public class InterpValue {
      * Perform comparisons of runtime iIntergers. This method assumes that type checking
      * has already succeeded.
      */
-    public InterpValue doRel(String op, InterpValue iright) {
+    public InterpValue doIntRel(String op, InterpValue iright) {
         Integer left = (Integer)this.value;
         Integer right = (Integer)iright.getValue();
 
@@ -84,6 +84,42 @@ public class InterpValue {
             break;
         case ">":
             answer = left > right;
+            break;
+        default:
+            answer = false;
+        }
+
+        return new InterpValue(InterpType.iBoolean, answer);
+    }
+
+    /**
+     * Perform comparisons of runtime iStrings. This method assumes that type checking
+     * has already succeeded.
+     */
+    public InterpValue doStringRel(String op, InterpValue iright) {
+        String left = (String)this.value;
+        String right = (String)iright.getValue();
+
+        Boolean answer;
+
+        switch(op) {
+        case "<":
+            answer = left.compareTo(right) < 0;
+            break;
+        case "<=" :
+            answer = left.compareTo(right) <= 0;
+            break;
+        case "?=":
+            answer = left.compareTo(right) == 0;
+            break;
+        case "!=":
+            answer = left.compareTo(right) != 0;
+            break;
+        case ">=":
+            answer = left.compareTo(right) >= 0;
+            break;
+        case ">":
+            answer = left.compareTo(right) > 0;
             break;
         default:
             answer = false;

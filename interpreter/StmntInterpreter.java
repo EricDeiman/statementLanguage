@@ -137,8 +137,13 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
     }
 
     @Override
-    public InterpValue visitLogicRel(StmntParser.LogicRelContext ctx) {
-        return visit(ctx.relExp());
+    public InterpValue visitLogicIntRel(StmntParser.LogicIntRelContext ctx) {
+        return visit(ctx.intRelExp());
+    }
+
+    @Override
+    public InterpValue visitLogicStringRel(StmntParser.LogicStringRelContext ctx) {
+        return visit(ctx.stringRelExp());
     }
 
     @Override
@@ -163,12 +168,21 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
     }
 
     @Override
-    public InterpValue visitRelExp(StmntParser.RelExpContext ctx) {
+    public InterpValue visitIntRelExp(StmntParser.IntRelExpContext ctx) {
         InterpValue ileft = visit(ctx.left);
         InterpValue iright = visit(ctx.right);
         String op = ctx.op.getText();
         expectTypes(InterpType.iInteger, ileft, iright);
-        return ileft.doRel(op, iright);
+        return ileft.doIntRel(op, iright);
+    }
+
+    @Override
+    public InterpValue visitStringRelExp(StmntParser.StringRelExpContext ctx) {
+        InterpValue ileft = visit(ctx.left);
+        InterpValue iright = visit(ctx.right);
+        String op = ctx.op.getText();
+        expectTypes(InterpType.iString, ileft, iright);
+        return ileft.doStringRel(op, iright);
     }
 
     //----------------------------------------------------------------------------

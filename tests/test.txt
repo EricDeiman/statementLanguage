@@ -10,3 +10,10 @@ print phrase ;
 boolValue <- 7 < 6 ;
 print boolValue ;
 print "That word up there should be false." ;
+
+LifeTheUniverseAndEverything <- alpha/beta?! ;
+print "This should say true: " LifeTheUniverseAndEverything < 100 and true ;
+
+print "This should say false: " "one" < "One" ;
+
+print "This should be an exception " 1 < "One" ;

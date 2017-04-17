@@ -25,7 +25,12 @@ public class Main {
 
         ParseTree tree = parser.prog();
 
-        StmntInterpreter interpreter = new StmntInterpreter();
-        interpreter.visit(tree);
+        if(parser.getNumberOfSyntaxErrors() == 0){
+            StmntInterpreter interpreter = new StmntInterpreter();
+            interpreter.visit(tree);
+        }
+        else {
+            System.out.println("oops! try again.");
+        }
     }
 }

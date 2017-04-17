@@ -33,7 +33,8 @@ logicExp : '(' logicExp ')' #LogicGroup
          | 'not' logicExp #LogicNot
          | left=logicExp 'and' right=logicExp #LogicAnd
          | left=logicExp 'or' right=logicExp #LogicOr
-         | relExp #LogicRel
+         | intRelExp #LogicIntRel
+         | stringRelExp #LogicStringRel
          | boolLit #LogicLit
          | ID #LogicId
          ;
@@ -42,8 +43,11 @@ boolLit : 'true' #LitTrue
         | 'false' #LitFalse
         ;
 
-relExp : left=arithExp op=('<'|'<='|'?='|'!='|'>='|'>') right=arithExp
-       ;
+intRelExp : left=arithExp op=('<'|'<='|'?='|'!='|'>='|'>') right=arithExp
+          ;
+
+stringRelExp : left=stringExp op=('<'|'<='|'?='|'!='|'>='|'>') right=stringExp
+             ;
 
 EOS : ';' ;
 
