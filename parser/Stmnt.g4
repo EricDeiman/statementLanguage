@@ -13,8 +13,9 @@ statement : 'print' expression+ EOS #PrintExp
           | ID '<-' expression EOS #Assign
           ;
 
-expression : arithExp 
-           | stringExp
+expression : arithExp #ArithE
+           | stringExp #StringE
+           | logicExp #LogicE
            ;
 
 arithExp : '(' arithExp ')' #ArithGroup
@@ -27,6 +28,22 @@ arithExp : '(' arithExp ')' #ArithGroup
 
 stringExp : STRING
           ;
+
+logicExp : '(' logicExp ')' #LogicGroup
+         | 'not' logicExp #LogicNot
+         | left=logicExp 'and' right=logicExp #LogicAnd
+         | left=logicExp 'or' right=logicExp #LogicOr
+         | relExp #LogicRel
+         | boolLit #LogicLit
+         | ID #LogicId
+         ;
+
+boolLit : 'true' #LitTrue
+        | 'false' #LitFalse
+        ;
+
+relExp : left=arithExp op=('<'|'<='|'?='|'!='|'>='|'>') right=arithExp
+       ;
 
 EOS : ';' ;
 

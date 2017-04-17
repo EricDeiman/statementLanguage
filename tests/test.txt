@@ -1,4 +1,5 @@
 print 2+3^2*4 ;
+print "That number up there should be 38." ;
 alpha/beta?! <- 2 * 3 * 7 ;
 print "Hello, world!" ;
 print "The answer is " alpha/beta?! ;
@@ -6,3 +7,6 @@ print "The answer is " alpha/beta?! ;
 phrase <- "Statement Language" ;
 print phrase ;
 
+boolValue <- 7 < 6 ;
+print boolValue ;
+print "That word up there should be false." ;

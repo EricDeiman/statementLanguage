@@ -26,22 +26,7 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
 
         for(StmntParser.ExpressionContext ectx : ctx.expression()) {
             answer = visit(ectx);
-
-            switch(answer.getType()){
-            case iInteger:
-                System.out.print((Integer)answer.getValue());
-                break;
-
-            case iString:
-                String say = (String)answer.getValue();
-                say = say.replace("\"", "");
-                System.out.print(say);
-                break;
-
-            default:
-                System.out.println("error: cannot print this expression " +
-                                   answer.getValue());
-            }
+            System.out.print(answer.toString());
         }
 
         System.out.println();
@@ -60,20 +45,18 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
     }
 
     @Override
-    public InterpValue visitExpression(StmntParser.ExpressionContext ctx) {
-        if(ctx.arithExp() != null) {
-            return visit(ctx.arithExp());
-        }
-        if (ctx.stringExp() != null) {
-            return visit(ctx.stringExp());
-        }
-        return null;
+    public InterpValue visitArithE(StmntParser.ArithEContext ctx) {
+        return visit(ctx.arithExp());
     }
 
     @Override
-    public InterpValue visitStringExp(StmntParser.StringExpContext ctx)  {
-        String value = ctx.STRING().getText();
-        return new InterpValue(InterpType.iString, value);
+    public InterpValue visitStringE(StmntParser.StringEContext ctx) {
+        return visit(ctx.stringExp());
+    }
+
+    @Override
+    public InterpValue visitLogicE(StmntParser.LogicEContext ctx) {
+        return visit(ctx.logicExp());
     }
 
     @Override
@@ -85,63 +68,26 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
     public InterpValue visitPower(StmntParser.PowerContext ctx) {
         InterpValue left = visit(ctx.left);
         InterpValue right = visit(ctx.right);
-
         expectTypes(InterpType.iInteger, left, right);
-
-        Integer base = (Integer)left.getValue();
-        Integer power = (Integer)right.getValue();
-        Double answer = Math.pow(base, power);
-
-        return new InterpValue(InterpType.iInteger, answer.intValue());
+        return left.doMath("^", right);
     }
 
     @Override
     public InterpValue visitMult(StmntParser.MultContext ctx) {
-        InterpValue ileft = visit(ctx.left);
-        InterpValue iright = visit(ctx.right);
-
-        expectTypes(InterpType.iInteger, ileft, iright);
-
-        Integer left = (Integer)ileft.getValue();
-        Integer right = (Integer)iright.getValue();
+        InterpValue left = visit(ctx.left);
+        InterpValue right = visit(ctx.right);
         String op = ctx.op.getText();
-
-        Integer answer;
-
-        if(op.equals("*")) {
-            answer = left * right;
-        }
-        else if(op.equals("div")) {
-            answer = left / right;
-        }
-        else {
-            answer = left % right;
-        }
-
-        return new InterpValue(InterpType.iInteger, answer);
+        expectTypes(InterpType.iInteger, left, right);
+        return left.doMath(op, right);
     }
 
     @Override
     public InterpValue visitAdd(StmntParser.AddContext ctx) {
         InterpValue ileft = visit(ctx.left);
         InterpValue iright = visit(ctx.right);
-
-        expectTypes(InterpType.iInteger, ileft, iright);
-
-        Integer left = (Integer)ileft.getValue();
-        Integer right = (Integer)iright.getValue();
         String op = ctx.op.getText();
-
-        Integer answer;
-
-        if(op.equals("+")) {
-            answer = left + right;
-        }
-        else {
-            answer = left - right;
-        }
-
-        return new InterpValue(InterpType.iInteger, answer);
+        expectTypes(InterpType.iInteger, ileft, iright);
+        return ileft.doMath(op, iright);
     }
 
     @Override
@@ -153,8 +99,76 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
     @Override
     public InterpValue visitId(StmntParser.IdContext ctx) {
         String name = ctx.ID().getText();
-
         return environment.get(name);
+    }
+
+    @Override
+    public InterpValue visitStringExp(StmntParser.StringExpContext ctx)  {
+        String value = ctx.STRING().getText();
+        return new InterpValue(InterpType.iString, value);
+    }
+
+    @Override
+    public InterpValue visitLogicGroup(StmntParser.LogicGroupContext ctx ) {
+        return visit(ctx.logicExp());
+    }
+
+    @Override
+    public InterpValue visitLogicNot(StmntParser.LogicNotContext ctx) {
+        InterpValue result = visit(ctx.logicExp());
+        expectType(InterpType.iBoolean, result);
+        return result.doLogic("not", null);
+    }
+
+    @Override
+    public InterpValue visitLogicAnd(StmntParser.LogicAndContext ctx) {
+        InterpValue ileft = visit(ctx.left);
+        InterpValue iright = visit(ctx.right);
+        expectTypes(InterpType.iBoolean, ileft, iright);
+        return ileft.doLogic("and", iright);
+    }
+
+    @Override
+    public InterpValue visitLogicOr(StmntParser.LogicOrContext ctx) {
+        InterpValue ileft = visit(ctx.left);
+        InterpValue iright = visit(ctx.right);
+        expectTypes(InterpType.iBoolean, ileft, iright);
+        return ileft.doLogic("or", iright);
+    }
+
+    @Override
+    public InterpValue visitLogicRel(StmntParser.LogicRelContext ctx) {
+        return visit(ctx.relExp());
+    }
+
+    @Override
+    public InterpValue visitLogicLit(StmntParser.LogicLitContext ctx) {
+        return visit(ctx.boolLit());
+    }
+
+    @Override
+    public InterpValue visitLogicId(StmntParser.LogicIdContext ctx) {
+        String name = ctx.ID().getText();
+        return environment.get(name);
+    }
+
+    @Override
+    public InterpValue visitLitTrue(StmntParser.LitTrueContext ctx) {
+        return new InterpValue(InterpType.iBoolean, true);
+    }
+
+    @Override
+    public InterpValue visitLitFalse(StmntParser.LitFalseContext ctx) {
+        return new InterpValue(InterpType.iBoolean, false);
+    }
+
+    @Override
+    public InterpValue visitRelExp(StmntParser.RelExpContext ctx) {
+        InterpValue ileft = visit(ctx.left);
+        InterpValue iright = visit(ctx.right);
+        String op = ctx.op.getText();
+        expectTypes(InterpType.iInteger, ileft, iright);
+        return ileft.doRel(op, iright);
     }
 
     //----------------------------------------------------------------------------
@@ -172,6 +186,18 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
         return true;
     }
 
+    private Boolean expectType(InterpType type, InterpValue left) {
+        InterpType leftType = left.getType();
+
+        if(leftType != type) {
+            String message = "expected value of type " + makeInterpTypeString(type) +
+                ", but got " + makeInterpTypeString(leftType);
+            throw new Error(message);
+        }
+
+        return true;
+    }
+
     private String makeInterpTypeString(InterpType iType) {
         switch(iType) {
         case iInteger:
@@ -179,6 +205,9 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
 
         case iString:
             return "string";
+
+        case iBoolean:
+            return "boolean";
         }
 
         return "";

@@ -1,7 +1,8 @@
 
 /**
  * Values that our interpreter works with.  It encapsulates the Java types that
- * are used to implement the interpreter.
+ * are used to implement the interpreter. Values also know how to perform primative
+ * operations on themselves, e.g., iIntergers know how to multiply or subtract themselves.
  */
 public class InterpValue {
 
@@ -19,6 +20,115 @@ public class InterpValue {
 
     public Object getValue() {
         return this.value;
+    }
+
+    /**
+     * Perform arithmatic on runtime iIntergers.  This method assumes that type checking
+     * has already succeeded.
+     */
+    public InterpValue doMath(String op, InterpValue iright) {
+        Integer left = (Integer)this.value;
+        Integer right = (Integer)iright.getValue();
+        Integer answer = 0;
+
+        switch(op) {
+        case "+":
+            answer = left + right;
+            break;
+        case "-":
+            answer = left - right;
+            break;
+        case "*":
+            answer = left * right;
+            break;
+        case "div":
+            answer = left / right;
+            break;
+        case "rem":
+            answer = left % right;
+            break;
+        case "^":
+            Double danswer = Math.pow(left, right);
+            answer = danswer.intValue();
+            break;
+        }
+
+        return new InterpValue(InterpType.iInteger, answer);
+    }
+
+    /**
+     * Perform comparisons of runtime iIntergers. This method assumes that type checking
+     * has already succeeded.
+     */
+    public InterpValue doRel(String op, InterpValue iright) {
+        Integer left = (Integer)this.value;
+        Integer right = (Integer)iright.getValue();
+
+        Boolean answer;
+
+        switch(op) {
+        case "<":
+            answer = left < right;
+            break;
+        case "<=" :
+            answer = left <= right;
+            break;
+        case "?=":
+            answer = left == right;
+            break;
+        case "!=":
+            answer = left != right;
+            break;
+        case ">=":
+            answer = left >= right;
+            break;
+        case ">":
+            answer = left > right;
+            break;
+        default:
+            answer = false;
+        }
+
+        return new InterpValue(InterpType.iBoolean, answer);
+    }
+
+    /**
+     * Perform logical operations on iBooleans.  This method assumes that type checking
+     * has already succeeded.
+     */
+    public InterpValue doLogic(String op, InterpValue iright) {
+        Boolean left = (Boolean)this.value;
+        Boolean right = false;
+
+        if(iright != null) {
+            right = (Boolean)iright.getValue();
+        }
+
+        Boolean answer = false;
+
+        switch(op) {
+        case "not":
+            answer = !left;
+            break;
+        case "and":
+            answer = left && right;
+            break;
+        case "or":
+            answer = left || right;
+            break;
+        }
+
+        return new InterpValue(InterpType.iBoolean, answer);
+    }
+
+    public String toString() {
+        if(type == InterpType.iString) {
+            StringBuilder sb = new StringBuilder((String)value);
+            sb.deleteCharAt(0);
+            sb.deleteCharAt(sb.length() - 1);
+            return sb.toString();
+        }
+        return value.toString();
     }
 
     private InterpType type;
