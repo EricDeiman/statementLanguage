@@ -11,7 +11,14 @@ prog : statement* EOF
 
 statement : 'print' expression+ EOS #PrintExp
           | ID '<-' expression EOS #Assign
+          | 'if' ifBlock ('else' 'if' ifBlock)* ('else' block)? #IfStmnt
           ;
+
+block : '{' statement*  '}'
+      ;
+
+ifBlock : '(' test=logicExp  ')' body=block
+        ;
 
 expression : arithExp #ArithE
            | stringExp #StringE
@@ -51,7 +58,7 @@ stringRelExp : left=stringExp op=('<'|'<='|'?='|'!='|'>='|'>') right=stringExp
 
 EOS : ';' ;
 
-NUMBER : DIGIT+ ;
+NUMBER : '-'? DIGIT+ ;
 ID : ALPHA(ALPHA|DIGIT|IDSYMBOLS)* ;
 
 STRING : '"' (ESC|.)*? '"' ;
@@ -65,5 +72,6 @@ IDSYMBOLS : [!@$%&*=?+:/-] ;
 fragment
 ESC : '\\"' | '\\\\' ; // The 2 character escape symbols \" and \\
 
+COMMENTEOL : '#' .*? '\r'? '\n' -> skip ;
 WS : [ \t\r\n]+ -> skip ;
 

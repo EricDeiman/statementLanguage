@@ -1,13 +1,15 @@
+# This is the tests for the language.  Hopefully it is self-explanatory.
 print 2+3^2*4 ;
 print "That number up there should be 38." ;
-alpha/beta?! <- 2 * 3 * 7 ;
+# names are mutable, what other languages call variables.
+alpha/beta?! <- 2 * 3 * 7 ; # assignment (mutation) is <-
 print "Hello, world!" ;
 print "The answer is " alpha/beta?! ;
 
 phrase <- "Statement Language" ;
 print phrase ;
 
-boolValue <- 7 < 6 ;
+boolValue <- 7 < -6 ;
 print boolValue ;
 print "That word up there should be false." ;
 
@@ -16,4 +18,38 @@ print "This should say true: " LifeTheUniverseAndEverything < 100 and true ;
 
 print "This should say false: " "one" < "One" ;
 
-print "This should be an exception " 1 < "One" ;
+print "Does -0 mean anything? " ;
+if( -0 ?= 0) {
+    print "Yes, it does." ;
+}
+else {
+     print "No, it doesn't." ;
+}
+
+print "Does 1 ?= 2?" ;
+if( 1 ?= 2 ) {
+    print "Yes, it does." ;
+}
+else {
+     print "No, it doesn't." ;
+}
+
+print "How do you spell 3?" ;
+number <- 3 ;
+if( number ?= 1 ) {
+    print "One" ;
+}
+else if( number ?= 2 ) {
+     print "Two" ;
+}
+else if( number ?= 3 ) {
+     print "Three" ;
+}
+else if( number ?= 4 ) {
+     print "Four" ;
+}
+
+first <- 1;
+second <- "two";
+
+print first ?= second;
