@@ -9,7 +9,7 @@ import parser.*;
 
 public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
 
-    public Map<String, InterpValue> environment = new HashMap<String,InterpValue>();
+    public Environment environment = new Environment();
 
     @Override
     public InterpValue visitProg(StmntParser.ProgContext ctx) {
@@ -23,11 +23,15 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
 
     @Override
     public InterpValue visitPrintExp(StmntParser.PrintExpContext ctx) {
-        InterpValue answer = null;
+        InterpValue answer = new InterpValue(InterpType.iString, "\"<null>\"");
 
         for(StmntParser.ExpressionContext ectx : ctx.expression()) {
             answer = visit(ectx);
+            if(answer == null) {
+                answer = new InterpValue(InterpType.iString, "\"<null>\"");
+            }
             System.out.print(answer.toString());
+            System.out.print(" ");
         }
 
         System.out.println();
@@ -71,13 +75,14 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
     @Override
     public InterpValue visitBlock(StmntParser.BlockContext ctx) {
         InterpValue answer = new InterpValue(InterpType.iInteger, 0);
+        environment.beginScope();
         for(StmntParser.StatementContext sctx : ctx.statement()) {
             answer = visit(sctx);
         }
-
+        environment.endScope();
         return answer;
     }
-        
+
     @Override
     public InterpValue visitArithE(StmntParser.ArithEContext ctx) {
         return visit(ctx.arithExp());
@@ -102,12 +107,7 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
     public InterpValue visitPower(StmntParser.PowerContext ctx) {
         InterpValue left = visit(ctx.left);
         InterpValue right = visit(ctx.right);
-        try {
-            expectTypes(InterpType.iInteger, left, right);
-        }
-        catch(Error er) {
-            throw runtimeError(ctx.getStart(), er.getMessage());
-        }
+        expectTypes(InterpType.iInteger, left, right, ctx.getStart());
         return left.doMath("^", right);
     }
 
@@ -116,12 +116,7 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
         InterpValue left = visit(ctx.left);
         InterpValue right = visit(ctx.right);
         String op = ctx.op.getText();
-        try {
-            expectTypes(InterpType.iInteger, left, right);
-        }
-        catch(Error er) {
-            throw runtimeError(ctx.getStart(), er.getMessage());
-        }
+        expectTypes(InterpType.iInteger, left, right, ctx.getStart());
         return left.doMath(op, right);
     }
 
@@ -130,12 +125,7 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
         InterpValue ileft = visit(ctx.left);
         InterpValue iright = visit(ctx.right);
         String op = ctx.op.getText();
-        try {
-            expectTypes(InterpType.iInteger, ileft, iright);
-        }
-        catch(Error er) {
-            throw runtimeError(ctx.getStart(), er.getMessage());
-        }
+        expectTypes(InterpType.iInteger, ileft, iright, ctx.getStart());
         return ileft.doMath(op, iright);
     }
 
@@ -165,12 +155,7 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
     @Override
     public InterpValue visitLogicNot(StmntParser.LogicNotContext ctx) {
         InterpValue result = visit(ctx.logicExp());
-        try {
-            expectType(InterpType.iBoolean, result);
-        }
-        catch(Error er) {
-            throw runtimeError(ctx.getStart(), er.getMessage());
-        }
+        expectType(InterpType.iBoolean, result, ctx.getStart());
         return result.doLogic("not", null);
     }
 
@@ -178,12 +163,7 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
     public InterpValue visitLogicAnd(StmntParser.LogicAndContext ctx) {
         InterpValue ileft = visit(ctx.left);
         InterpValue iright = visit(ctx.right);
-        try {
-            expectTypes(InterpType.iBoolean, ileft, iright);
-        }
-        catch(Error er) {
-            throw runtimeError(ctx.getStart(), er.getMessage());
-        }
+        expectTypes(InterpType.iBoolean, ileft, iright, ctx.getStart());
         return ileft.doLogic("and", iright);
     }
 
@@ -191,12 +171,7 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
     public InterpValue visitLogicOr(StmntParser.LogicOrContext ctx) {
         InterpValue ileft = visit(ctx.left);
         InterpValue iright = visit(ctx.right);
-        try {
-            expectTypes(InterpType.iBoolean, ileft, iright);
-        }
-        catch(Error er) {
-            throw runtimeError(ctx.getStart(), er.getMessage());
-        }
+        expectTypes(InterpType.iBoolean, ileft, iright, ctx.getStart());
         return ileft.doLogic("or", iright);
     }
 
@@ -242,12 +217,7 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
             return ileft.doStringRel(op, iright);
         }
 
-        try {
-            expectTypes(InterpType.iInteger, ileft, iright);
-        }
-        catch(Error er) {
-            throw runtimeError(ctx.getStart(), er.getMessage());
-        }
+        expectTypes(InterpType.iInteger, ileft, iright, ctx.getStart());
         return ileft.doIntRel(op, iright);
     }
 
@@ -256,12 +226,7 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
         InterpValue ileft = visit(ctx.left);
         InterpValue iright = visit(ctx.right);
         String op = ctx.op.getText();
-        try {
-            expectTypes(InterpType.iString, ileft, iright);
-        }
-        catch(Error er) {
-            throw runtimeError(ctx.getStart(), er.getMessage());
-        }
+        expectTypes(InterpType.iString, ileft, iright, ctx.getStart());
         return ileft.doStringRel(op, iright);
     }
 
@@ -270,30 +235,31 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
     private Error runtimeError(Token token, String message) {
         return new Error("runtime error near " +
                          token.getLine() + ":" +
-                         (token.getCharPositionInLine() + 1 ) +
+                         (token.getCharPositionInLine()) +
                          "  " + message);
     }
 
-    private Boolean expectTypes(InterpType type, InterpValue left, InterpValue right) {
+    private Boolean expectTypes(InterpType type, InterpValue left, InterpValue right,
+                                Token where) {
         InterpType leftType = left.getType();
         InterpType rightType = right.getType();
 
         if(leftType != type || rightType != type) {
             String message = "expected 2 values of " + makeInterpTypeString(type) +
                 ", but got " + makeTypeMismatchMessage(left, right);
-            throw new Error(message);
+            throw runtimeError(where, message);
         }
 
         return true;
     }
 
-    private Boolean expectType(InterpType type, InterpValue left) {
+    private Boolean expectType(InterpType type, InterpValue left, Token where) {
         InterpType leftType = left.getType();
 
         if(leftType != type) {
             String message = "expected value of type " + makeInterpTypeString(type) +
                 ", but got " + makeInterpTypeString(leftType);
-            throw new Error(message);
+            throw runtimeError(where, message);
         }
 
         return true;

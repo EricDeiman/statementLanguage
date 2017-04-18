@@ -49,7 +49,24 @@ else if( number ?= 4 ) {
      print "Four" ;
 }
 
-first <- 1;
-second <- "two";
+print "What does '7 - 4' mean? " 7 - 4 ;
+print "What does '7-4' mean? " 7-4 ;
 
-print first ?= second;
+a <- 7;
+b <- 3;
+a-5 <- "The string 'a-5'.";
+
+print "What does 'a-5' evaluate to? " a-5 ;
+
+if(true)
+{
+  j <- "Jay" ;
+  print "What is 'j'?" j;
+}
+
+print "What is 'j'?" j;
+
+# Let's end with a run-time error:
+one <- 1;
+two <- "Two";
+print "What does this say?" one < two ;

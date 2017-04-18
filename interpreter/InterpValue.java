@@ -1,4 +1,6 @@
 
+import org.antlr.v4.runtime.Token;
+
 /**
  * Values that our interpreter works with.  It encapsulates the Java types that
  * are used to implement the interpreter. Values also know how to perform primative
@@ -159,6 +161,8 @@ public class InterpValue {
 
     public String toString() {
         if(type == InterpType.iString) {
+            // The ANTLR parser returns the double quotes around the string.
+            // When the string gets printed by the interpreter, they get taken off.
             StringBuilder sb = new StringBuilder((String)value);
             sb.deleteCharAt(0);
             sb.deleteCharAt(sb.length() - 1);
