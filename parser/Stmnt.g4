@@ -9,9 +9,10 @@ grammar Stmnt;
 prog : statement* EOF
      ;
 
-statement : 'print' expression+ EOS #PrintExp
+statement : 'print' expression+ EOS #PrintStmnt
           | ID '<-' expression EOS #Assign
           | 'if' ifBlock ('else' 'if' ifBlock)* ('else' block)? #IfStmnt
+          | 'while' '(' test=logicExp ')' body=block  #WhileStmnt
           ;
 
 block : '{' statement*  '}'

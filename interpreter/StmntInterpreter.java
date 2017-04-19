@@ -22,7 +22,7 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
     }
 
     @Override
-    public InterpValue visitPrintExp(StmntParser.PrintExpContext ctx) {
+    public InterpValue visitPrintStmnt(StmntParser.PrintStmntContext ctx) {
         InterpValue answer = new InterpValue(InterpType.iString, "\"<null>\"");
 
         for(StmntParser.ExpressionContext ectx : ctx.expression()) {
@@ -51,7 +51,7 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
 
     @Override
     public InterpValue visitIfStmnt(StmntParser.IfStmntContext ctx) {
-        InterpValue answer = null;
+        InterpValue answer = new InterpValue(InterpType.iInteger, 0);
         List<StmntParser.IfBlockContext> conditions = ctx.ifBlock();
 
         Boolean evaluated = false;
@@ -67,6 +67,24 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
 
         if(!evaluated && ctx.block() != null) {
             answer = visit(ctx.block());
+        }
+
+        return answer;
+    }
+
+    @Override
+    public InterpValue visitWhileStmnt(StmntParser.WhileStmntContext ctx) {
+        InterpValue answer = new InterpValue(InterpType.iInteger, 0);
+
+        while(true) {
+            InterpValue result = visit(ctx.test);
+            expectType(InterpType.iBoolean, result, ctx.getStart());
+            if((Boolean)result.getValue() == true) {
+                answer = visit(ctx.body);
+            }
+            else {
+                break;
+            }
         }
 
         return answer;

@@ -10,7 +10,7 @@ import java.util.HashMap;
  * <p>When a new key-value pair is added, it will always be to the newest scope.</p>
  *
  * <p>When a key is searched for, the search starts from the most recent scope and
- * works backwards through scopes.<p>
+ * works backwards through scopes until the key if found or the scopes exhausted.<p>
  *
  * <p>When a block is exited, the most recently created store is removed.</p>
  */
@@ -21,7 +21,17 @@ public class Environment {
         store.add(new HashMap<String, InterpValue>());
     }
 
+    /**
+     * This is a 2-step process.  First check to see if key already exits in some
+     * scope.  If it does, use that.  If it does not, then add it to the most recent
+     * scope.
+     */
     public InterpValue put(String key, InterpValue value) {
+        for(int i = store.size() - 1; 0 <= i; i--) {
+            if(store.get(i).containsKey(key)) {
+                return store.get(i).put(key, value);
+            }
+        }
         return store.get(store.size() - 1).put(key, value);
     }
 
