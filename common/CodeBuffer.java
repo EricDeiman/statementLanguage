@@ -1,8 +1,8 @@
-import java.util.Vector;
-import java.io.OutputStream;
-import java.io.InputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Vector;
 
 /**
  * <p>Store and manipulate bytes in big-endian format.  In a way there are 2

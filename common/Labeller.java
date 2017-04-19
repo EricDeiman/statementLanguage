@@ -10,6 +10,11 @@ public class Labeller {
         label = "label";
     }
 
+    public Labeller(String prefix) {
+        couner = 0;
+        label = prefix;
+    }
+
     public String make() {
         return make(this.label);
     }
