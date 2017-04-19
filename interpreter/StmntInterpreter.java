@@ -13,7 +13,7 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
 
     @Override
     public InterpValue visitProg(StmntParser.ProgContext ctx) {
-        InterpValue answer = new InterpValue(InterpType.iInteger, 0);
+        InterpValue answer = iIntergerZero;
         for(StmntParser.StatementContext sctx : ctx.statement()) {
             answer = visit(sctx);
         }
@@ -23,12 +23,12 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
 
     @Override
     public InterpValue visitPrintStmnt(StmntParser.PrintStmntContext ctx) {
-        InterpValue answer = new InterpValue(InterpType.iString, "\"<null>\"");
+        InterpValue answer = iStringNull;
 
         for(StmntParser.ExpressionContext ectx : ctx.expression()) {
             answer = visit(ectx);
             if(answer == null) {
-                answer = new InterpValue(InterpType.iString, "\"<null>\"");
+                answer = iStringNull;
             }
             System.out.print(answer.toString());
             System.out.print(" ");
@@ -51,13 +51,14 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
 
     @Override
     public InterpValue visitIfStmnt(StmntParser.IfStmntContext ctx) {
-        InterpValue answer = new InterpValue(InterpType.iInteger, 0);
+        InterpValue answer = iIntergerZero;
         List<StmntParser.IfBlockContext> conditions = ctx.ifBlock();
 
         Boolean evaluated = false;
 
         for(StmntParser.IfBlockContext ifBlock : conditions) {
             InterpValue result = visit(ifBlock.test);
+            expectType(InterpType.iBoolean, result, ctx.getStart());
             if((Boolean)result.getValue()) {
                 evaluated = true;
                 answer = visit(ifBlock.body);
@@ -74,12 +75,12 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
 
     @Override
     public InterpValue visitWhileStmnt(StmntParser.WhileStmntContext ctx) {
-        InterpValue answer = new InterpValue(InterpType.iInteger, 0);
+        InterpValue answer = iIntergerZero;
 
         while(true) {
             InterpValue result = visit(ctx.test);
             expectType(InterpType.iBoolean, result, ctx.getStart());
-            if((Boolean)result.getValue() == true) {
+            if((Boolean)result.getValue()) {
                 answer = visit(ctx.body);
             }
             else {
@@ -92,7 +93,7 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
 
     @Override
     public InterpValue visitBlock(StmntParser.BlockContext ctx) {
-        InterpValue answer = new InterpValue(InterpType.iInteger, 0);
+        InterpValue answer = iIntergerZero;
         environment.beginScope();
         for(StmntParser.StatementContext sctx : ctx.statement()) {
             answer = visit(sctx);
@@ -304,4 +305,8 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
 
         return leftType + " " + rightType;
     }
+
+    private InterpValue iIntergerZero = new InterpValue(InterpType.iInteger, 0);
+    private InterpValue iStringNull = new InterpValue(InterpType.iString, "\"<null>\"");
+
 }

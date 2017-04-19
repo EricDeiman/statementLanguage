@@ -58,7 +58,8 @@ a-5 <- "The string 'a-5'.";
 
 print "What does 'a-5' evaluate to? " a-5 ;
 
-if(true)
+ImTrue <- true;
+if(ImTrue)
 {
   j <- "Jay" ;
   print "What is 'j'?" j;
