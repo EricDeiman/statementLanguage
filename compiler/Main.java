@@ -14,6 +14,10 @@ public class Main {
             inputFileName = args[0];
         }
 
+        int pos = inputFileName.lastIndexOf('.');
+        String target = inputFileName.substring(pos);
+        String outputFileName = inputFileName.replace(target, ".o");
+
         InputStream is = System.in;
         if(inputFileName != null) {
             is = new FileInputStream(inputFileName);
@@ -28,8 +32,9 @@ public class Main {
 
         if(parser.getNumberOfSyntaxErrors() == 0){
             try {
-                StmntInterpreter interpreter = new StmntInterpreter();
-                interpreter.visit(tree);
+                Compile compiler = new Compile();
+                compiler.visit(tree);
+                compiler.writeCodeTo(outputFileName);
             }
             catch(RuntimeError err) {
                 System.err.println("The program doesn't mean what you think it means: " +

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import parser.*;
+import common.RuntimeError;
 
 public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
 
@@ -251,8 +252,8 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
 
     //----------------------------------------------------------------------------
 
-    private Error runtimeError(Token token, String message) {
-        return new Error("runtime error near " +
+    private RuntimeError runtimeError(Token token, String message) {
+        return new RuntimeError("runtime error near " +
                          token.getLine() + ":" +
                          (token.getCharPositionInLine()) +
                          "  " + message);

@@ -3,9 +3,9 @@ JARS:=../jars/
 JAVACFLAGS:=-cp $(CLASSPATH)../jars/Stmnt.jar:../jars/common.jar
 JAR=jar
 JARFLAGS=cfm
-CP:=cp
+CP:= cp
 
-PROJECTNAME:=$(shell basename `pwd`)
+PROJECTNAME:=am
 SOURCE:=$(wildcard *.java)
 JARNAME:=$(PROJECTNAME).jar
 

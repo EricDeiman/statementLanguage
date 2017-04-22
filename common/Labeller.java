@@ -1,4 +1,4 @@
-
+package common;
 
 /**
  * A simple class to return unique labels. Never returns the same one twice.
@@ -11,7 +11,7 @@ public class Labeller {
     }
 
     public Labeller(String prefix) {
-        couner = 0;
+        counter = 0;
         label = prefix;
     }
 
