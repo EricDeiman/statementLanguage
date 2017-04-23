@@ -5,6 +5,8 @@ import java.util.List;
 
 import common.ByteCodes;
 import common.CodeBuffer;
+import common.RuntimeType;
+
 import parser.*;
 
 public class Compile extends StmntBaseVisitor<Integer> {
@@ -18,7 +20,7 @@ public class Compile extends StmntBaseVisitor<Integer> {
         for(StmntParser.StatementContext sctx : ctx.statement()) {
             answer = visit(sctx);
         }
-        code.writeByte(ByteCodes.Halt);
+        code.writeByte(ByteCodes.Halt.ordinal());
         return answer;
     }
 
@@ -30,7 +32,7 @@ public class Compile extends StmntBaseVisitor<Integer> {
             answer = visit(ectx);
         }
 
-        code.writeByte(ByteCodes.Print);
+        code.writeByte(ByteCodes.Print.ordinal());
 
         return answer;
     }
@@ -105,7 +107,7 @@ public class Compile extends StmntBaseVisitor<Integer> {
     public Integer visitPower(StmntParser.PowerContext ctx) {
         visit(ctx.left);
         visit(ctx.right);
-        code.writeByte(ByteCodes.Pow);
+        code.writeByte(ByteCodes.Pow.ordinal());
         return 0;
     }
 
@@ -114,14 +116,14 @@ public class Compile extends StmntBaseVisitor<Integer> {
         visit(ctx.left);
         visit(ctx.right);
         String op = ctx.op.getText();
-        if(op == "*") {
-            code.writeByte(ByteCodes.Mul);
+        if(op.equals("*")) {
+            code.writeByte(ByteCodes.Mul.ordinal());
         }
-        else if(op == "div") {
-            code.writeByte(ByteCodes.Div);
+        else if(op.equals("div")) {
+            code.writeByte(ByteCodes.Div.ordinal());
         }
         else {
-            code.writeByte(ByteCodes.Rem);
+            code.writeByte(ByteCodes.Rem.ordinal());
         }
 
         return 0;
@@ -133,12 +135,10 @@ public class Compile extends StmntBaseVisitor<Integer> {
         visit(ctx.right);
         String op = ctx.op.getText();
         if(op.equals("+")) {
-            System.out.println("see " + op + " writing add");
-            code.writeByte(ByteCodes.Add);
+            code.writeByte(ByteCodes.Add.ordinal());
         }
         else {
-            System.out.println("see " + op + " writing sub");
-            code.writeByte(ByteCodes.Sub);
+            code.writeByte(ByteCodes.Sub.ordinal());
         }
         return 0;
     }
@@ -146,7 +146,8 @@ public class Compile extends StmntBaseVisitor<Integer> {
     @Override
     public Integer visitNumber(StmntParser.NumberContext ctx) {
         Integer answer = Integer.valueOf(ctx.NUMBER().getText());
-        code.writeByte(ByteCodes.Push).writeInteger(answer);
+        code.writeByte(ByteCodes.Push.ordinal()).writeByte(RuntimeType.iInteger.ordinal())
+            .writeInteger(answer);
         return answer;
     }
 
@@ -170,7 +171,7 @@ public class Compile extends StmntBaseVisitor<Integer> {
     @Override
     public Integer visitLogicNot(StmntParser.LogicNotContext ctx) {
         visit(ctx.logicExp());
-        code.writeByte(ByteCodes.Not);
+        code.writeByte(ByteCodes.Not.ordinal());
         return 0;
     }
 
@@ -178,7 +179,7 @@ public class Compile extends StmntBaseVisitor<Integer> {
     public Integer visitLogicAnd(StmntParser.LogicAndContext ctx) {
         visit(ctx.left);
         visit(ctx.right);
-        code.writeByte(ByteCodes.And);
+        code.writeByte(ByteCodes.And.ordinal());
         return 0;
     }
 
@@ -186,7 +187,7 @@ public class Compile extends StmntBaseVisitor<Integer> {
     public Integer visitLogicOr(StmntParser.LogicOrContext ctx) {
         visit(ctx.left);
         visit(ctx.right);
-        code.writeByte(ByteCodes.Or);
+        code.writeByte(ByteCodes.Or.ordinal());
         return 0;
     }
 
@@ -213,13 +214,15 @@ public class Compile extends StmntBaseVisitor<Integer> {
 
     @Override
     public Integer visitLitTrue(StmntParser.LitTrueContext ctx) {
-        code.writeByte(ByteCodes.Push).writeInteger(1);
+        code.writeByte(ByteCodes.Push.ordinal()).writeByte(RuntimeType.iBoolean.ordinal())
+            .writeInteger(1);
         return 0;
     }
 
     @Override
     public Integer visitLitFalse(StmntParser.LitFalseContext ctx) {
-        code.writeByte(ByteCodes.Push).writeInteger(0);
+        code.writeByte(ByteCodes.Push.ordinal()).writeByte(RuntimeType.iBoolean.ordinal())
+            .writeInteger(0);
         return 0;
     }
 
@@ -230,22 +233,22 @@ public class Compile extends StmntBaseVisitor<Integer> {
         String op = ctx.op.getText();
         switch(op) {
         case "<":
-            code.writeByte(ByteCodes.Lt);
+            code.writeByte(ByteCodes.Lt.ordinal());
             break;
         case "<=":
-            code.writeByte(ByteCodes.Lte);
+            code.writeByte(ByteCodes.Lte.ordinal());
             break;
         case "?=":
-            code.writeByte(ByteCodes.Eq);
+            code.writeByte(ByteCodes.Eq.ordinal());
             break;
         case "!=":
-            code.writeByte(ByteCodes.Neq);
+            code.writeByte(ByteCodes.Neq.ordinal());
             break;
         case ">=":
-            code.writeByte(ByteCodes.Gte);
+            code.writeByte(ByteCodes.Gte.ordinal());
             break;
         case ">":
-            code.writeByte(ByteCodes.Gt);
+            code.writeByte(ByteCodes.Gt.ordinal());
         }
         return 0;
     }

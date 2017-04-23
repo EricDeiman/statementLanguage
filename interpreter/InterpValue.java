@@ -1,6 +1,8 @@
 
 import org.antlr.v4.runtime.Token;
 
+import common.RuntimeType;
+
 /**
  * Values that our interpreter works with.  It encapsulates the Java types that
  * are used to implement the interpreter. Values also know how to perform primative
@@ -11,12 +13,12 @@ public class InterpValue {
     /**
      * Interpret-time values know their type along with their value.
      */
-    public InterpValue( InterpType type, Object value) {
+    public InterpValue( RuntimeType type, Object value) {
         this.type = type;
         this.value = value;
     }
 
-    public InterpType getType() {
+    public RuntimeType getType() {
         return this.type;
     }
 
@@ -55,7 +57,7 @@ public class InterpValue {
             break;
         }
 
-        return new InterpValue(InterpType.iInteger, answer);
+        return new InterpValue(RuntimeType.iInteger, answer);
     }
 
     /**
@@ -91,7 +93,7 @@ public class InterpValue {
             answer = false;
         }
 
-        return new InterpValue(InterpType.iBoolean, answer);
+        return new InterpValue(RuntimeType.iBoolean, answer);
     }
 
     /**
@@ -127,7 +129,7 @@ public class InterpValue {
             answer = false;
         }
 
-        return new InterpValue(InterpType.iBoolean, answer);
+        return new InterpValue(RuntimeType.iBoolean, answer);
     }
 
     /**
@@ -156,11 +158,11 @@ public class InterpValue {
             break;
         }
 
-        return new InterpValue(InterpType.iBoolean, answer);
+        return new InterpValue(RuntimeType.iBoolean, answer);
     }
 
     public String toString() {
-        if(type == InterpType.iString) {
+        if(type == RuntimeType.iString) {
             // The ANTLR parser returns the double quotes around the string.
             // When the string gets printed by the interpreter, they get taken off.
             StringBuilder sb = new StringBuilder((String)value);
@@ -171,6 +173,6 @@ public class InterpValue {
         return value.toString();
     }
 
-    private InterpType type;
+    private RuntimeType type;
     private Object value;
 }
