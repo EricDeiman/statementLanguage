@@ -78,6 +78,10 @@ print "";
 print "What is '7 div 3'?" 7 div 3 ;
 print "What is '7 rem 3'?" 7 rem 3 ;
 print "";
+
+n <- 4_2;
+print "Fourty-two:" n ;
+
 # Let's end with a run-time error:
 one <- 1;
 two <- "Two";

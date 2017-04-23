@@ -59,7 +59,7 @@ stringRelExp : left=stringExp op=('<'|'<='|'?='|'!='|'>='|'>') right=stringExp
 
 EOS : ';' ;
 
-NUMBER : '-'? DIGIT+ ;
+NUMBER : '-'? DIGIT(DIGIT|'_')* ;
 ID : ALPHA(ALPHA|DIGIT|IDSYMBOLS)* ;
 
 STRING : '"' (ESC|.)*? '"' ;

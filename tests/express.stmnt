@@ -1,3 +1,6 @@
 print 4^(2 + 4 - 3)^2 ;
 print (7 - 1) * 6 ;
 print 5 + 5 + 5 ;
+print 9 div 5 ;
+print 9 rem 5 ;
+print 2_1 * 2 ;

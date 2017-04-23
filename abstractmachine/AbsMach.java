@@ -46,10 +46,9 @@ public class AbsMach {
                 rightType = runtimeTypeCache[stack.pop()];
                 leftValue = stack.pop();
                 leftType = runtimeTypeCache[stack.pop()];
-                if(rightType != RuntimeType.iInteger || leftType != RuntimeType.iInteger) {
-                    throw new RuntimeError("attempting to add types of " +
-                                           rightType.name() + " and " + leftType.name());
-                }
+
+                expectTypes(RuntimeType.iInteger, leftType, rightType, "add");
+
                 stack.push(RuntimeType.iInteger.ordinal());
                 stack.push(leftValue + rightValue);
                 break;
@@ -58,10 +57,9 @@ public class AbsMach {
                 rightType = runtimeTypeCache[stack.pop()];
                 leftValue = stack.pop();
                 leftType = runtimeTypeCache[stack.pop()];
-                if(rightType != RuntimeType.iInteger || leftType != RuntimeType.iInteger) {
-                    throw new RuntimeError("attempting to subtract types of " +
-                                           rightType.name() + " and " + leftType.name());
-                }
+
+                expectTypes(RuntimeType.iInteger, leftType, rightType, "subtract");
+
                 stack.push(RuntimeType.iInteger.ordinal());
                 stack.push(leftValue - rightValue);
                 break;
@@ -70,10 +68,9 @@ public class AbsMach {
                 rightType = runtimeTypeCache[stack.pop()];
                 leftValue = stack.pop();
                 leftType = runtimeTypeCache[stack.pop()];
-                if(rightType != RuntimeType.iInteger || leftType != RuntimeType.iInteger) {
-                    throw new RuntimeError("attempting to multiply types of " +
-                                           rightType.name() + " and " + leftType.name());
-                }
+
+                expectTypes(RuntimeType.iInteger, leftType, rightType, "multiply");
+
                 stack.push(RuntimeType.iInteger.ordinal());
                 stack.push(leftValue * rightValue);
                 break;
@@ -82,10 +79,9 @@ public class AbsMach {
                 rightType = runtimeTypeCache[stack.pop()];
                 leftValue = stack.pop();
                 leftType = runtimeTypeCache[stack.pop()];
-                if(rightType != RuntimeType.iInteger || leftType != RuntimeType.iInteger) {
-                    throw new RuntimeError("attempting to 'div' types of " +
-                                           rightType.name() + " and " + leftType.name());
-                }
+
+                expectTypes(RuntimeType.iInteger, leftType, rightType, "'div'");
+
                 stack.push(RuntimeType.iInteger.ordinal());
                 stack.push(leftValue / rightValue);
                 break;
@@ -94,10 +90,9 @@ public class AbsMach {
                 rightType = runtimeTypeCache[stack.pop()];
                 leftValue = stack.pop();
                 leftType = runtimeTypeCache[stack.pop()];
-                if(rightType != RuntimeType.iInteger || leftType != RuntimeType.iInteger) {
-                    throw new RuntimeError("attempting to 'rem' types of " +
-                                           rightType.name() + " and " + leftType.name());
-                }
+
+                expectTypes(RuntimeType.iInteger, leftType, rightType, "'rem'");
+
                 stack.push(RuntimeType.iInteger.ordinal());
                 stack.push(leftValue % rightValue);
                 break;
@@ -106,10 +101,9 @@ public class AbsMach {
                 rightType = runtimeTypeCache[stack.pop()];
                 leftValue = stack.pop();
                 leftType = runtimeTypeCache[stack.pop()];
-                if(rightType != RuntimeType.iInteger || leftType != RuntimeType.iInteger) {
-                    throw new RuntimeError("attempting to 'pow' types of " +
-                                           rightType.name() + " and " + leftType.name());
-                }
+
+                expectTypes(RuntimeType.iInteger, leftType, rightType, "'pow'");
+
                 Double danswer = Math.pow(leftValue, rightValue);
                 stack.push(RuntimeType.iInteger.ordinal());
                 stack.push(danswer.intValue());
@@ -119,10 +113,9 @@ public class AbsMach {
                 rightType = runtimeTypeCache[stack.pop()];
                 leftValue = stack.pop();
                 leftType = runtimeTypeCache[stack.pop()];
-                if(rightType != RuntimeType.iInteger || leftType != RuntimeType.iInteger) {
-                    throw new RuntimeError("attempting to '<' types of " +
-                                           rightType.name() + " and " + leftType.name());
-                }
+
+                expectTypes(RuntimeType.iInteger, leftType, rightType, "'<'");
+
                 pushBoolean(leftValue < rightValue);
                 break;
             case Lte:
@@ -130,10 +123,9 @@ public class AbsMach {
                 rightType = runtimeTypeCache[stack.pop()];
                 leftValue = stack.pop();
                 leftType = runtimeTypeCache[stack.pop()];
-                if(rightType != RuntimeType.iInteger || leftType != RuntimeType.iInteger) {
-                    throw new RuntimeError("attempting to '<=' types of " +
-                                           rightType.name() + " and " + leftType.name());
-                }
+
+                expectTypes(RuntimeType.iInteger, leftType, rightType, "'<='");
+
                 pushBoolean(leftValue <= rightValue);
                 break;
             case Eq:
@@ -141,6 +133,8 @@ public class AbsMach {
                 rightType = runtimeTypeCache[stack.pop()];
                 leftValue = stack.pop();
                 leftType = runtimeTypeCache[stack.pop()];
+
+                expectTypes(RuntimeType.iInteger, leftType, rightType, "?='");
                 if(rightType != RuntimeType.iInteger || leftType != RuntimeType.iInteger) {
                     throw new RuntimeError("attempting to '?=' types of " +
                                            rightType.name() + " and " + leftType.name());
@@ -152,10 +146,9 @@ public class AbsMach {
                 rightType = runtimeTypeCache[stack.pop()];
                 leftValue = stack.pop();
                 leftType = runtimeTypeCache[stack.pop()];
-                if(rightType != RuntimeType.iInteger || leftType != RuntimeType.iInteger) {
-                    throw new RuntimeError("attempting to '!=' types of " +
-                                           rightType.name() + " and " + leftType.name());
-                }
+
+                expectTypes(RuntimeType.iInteger, leftType, rightType, "'!='");
+
                 pushBoolean(leftValue != rightValue);
                 break;
             case Gte:
@@ -163,10 +156,9 @@ public class AbsMach {
                 rightType = runtimeTypeCache[stack.pop()];
                 leftValue = stack.pop();
                 leftType = runtimeTypeCache[stack.pop()];
-                if(rightType != RuntimeType.iInteger || leftType != RuntimeType.iInteger) {
-                    throw new RuntimeError("attempting to '>=' types of " +
-                                           rightType.name() + " and " + leftType.name());
-                }
+
+                expectTypes(RuntimeType.iInteger, leftType, rightType, "'>='");
+
                 pushBoolean(leftValue >= rightValue);
                 break;
             case Gt:
@@ -174,10 +166,9 @@ public class AbsMach {
                 rightType = runtimeTypeCache[stack.pop()];
                 leftValue = stack.pop();
                 leftType = runtimeTypeCache[stack.pop()];
-                if(rightType != RuntimeType.iInteger || leftType != RuntimeType.iInteger) {
-                    throw new RuntimeError("attempting to '>' types of " +
-                                           rightType.name() + " and " + leftType.name());
-                }
+
+                expectTypes(RuntimeType.iInteger, leftType, rightType, "'>'");
+
                 pushBoolean(leftValue > rightValue);
                 break;
             case And:
@@ -185,10 +176,9 @@ public class AbsMach {
                 rightType = runtimeTypeCache[stack.pop()];
                 leftValue = stack.pop();
                 leftType = runtimeTypeCache[stack.pop()];
-                if(rightType != RuntimeType.iBoolean || leftType != RuntimeType.iBoolean) {
-                    throw new RuntimeError("attempting to 'and' types of " +
-                                           rightType.name() + " and " + leftType.name());
-                }
+
+                expectTypes(RuntimeType.iBoolean, leftType, rightType, "'and'");
+
                 pushBoolean(leftValue == 1 && rightValue == 1);
                 break;
             case Or:
@@ -196,19 +186,17 @@ public class AbsMach {
                 rightType = runtimeTypeCache[stack.pop()];
                 leftValue = stack.pop();
                 leftType = runtimeTypeCache[stack.pop()];
-                if(rightType != RuntimeType.iBoolean || leftType != RuntimeType.iBoolean) {
-                    throw new RuntimeError("attempting to 'or' types of " +
-                                           rightType.name() + " and " + leftType.name());
-                }
+
+                expectTypes(RuntimeType.iBoolean, leftType, rightType, "'or'");
+
                 pushBoolean(leftValue == 1 || rightValue == 1);
                 break;
             case Not:
                 rightValue = stack.pop();
                 rightType = runtimeTypeCache[stack.pop()];
-                if(rightType != RuntimeType.iBoolean) {
-                    throw new RuntimeError("attempting to 'not' a type of " +
-                                           rightType.name());
-                }
+
+                expectType(RuntimeType.iBoolean, rightType, "'not'");
+
                 pushBoolean(!(rightValue == 1));
                 break;
             case Print:
@@ -270,6 +258,24 @@ public class AbsMach {
         else {
             stack.push(0);
         }
+    }
+
+    private Boolean expectTypes(RuntimeType expect, RuntimeType left, RuntimeType right,
+                        String op) {
+        if(left != expect || right != expect) {
+            throw new RuntimeError("attempting to " + op + " types of " + left.name() +
+                                   " and " + right.name());
+        }
+
+        return true;
+    }
+
+    private Boolean expectType(RuntimeType expect, RuntimeType left, String op) {
+        if(left != expect) {
+            throw new RuntimeError("attempting to " + op + " a type of " + left.name());
+        }
+
+        return true;
     }
 
     private CodeBuffer code;

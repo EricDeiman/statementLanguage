@@ -145,7 +145,7 @@ public class Compile extends StmntBaseVisitor<Integer> {
 
     @Override
     public Integer visitNumber(StmntParser.NumberContext ctx) {
-        Integer answer = Integer.valueOf(ctx.NUMBER().getText());
+        Integer answer = Integer.valueOf(ctx.NUMBER().getText().replace("_", ""));
         code.writeByte(ByteCodes.Push.ordinal()).writeByte(RuntimeType.iInteger.ordinal())
             .writeInteger(answer);
         return answer;

@@ -152,7 +152,7 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
 
     @Override
     public InterpValue visitNumber(StmntParser.NumberContext ctx) {
-        Integer answer = Integer.valueOf(ctx.NUMBER().getText());
+        Integer answer = Integer.valueOf(ctx.NUMBER().getText().replace("_", ""));
         return new InterpValue(RuntimeType.iInteger, answer);
     }
 
