@@ -214,6 +214,16 @@ public class AbsMach {
                     break;
                 }
                 break;
+            case Move:
+                leftValue = code.readInteger();
+                stack.setElementAt(stack.pop(), leftValue + 1); // value
+                stack.setElementAt(stack.pop(), leftValue);     // type
+                break;
+            case Copy:
+                leftValue = code.readInteger();
+                stack.push(stack.elementAt(leftValue));      // type
+                stack.push(stack.elementAt(leftValue + 1));  // value
+                break;
             default:
                 break;
             }
@@ -231,11 +241,16 @@ public class AbsMach {
 
         Trace tracer = new EmptyTrace();
         int fileArg = 0;
+        Boolean disasm = false;
 
         if(args.length == 2) {
             switch(args[0]) {
             case "-print":
                 tracer = new PrintTrace(System.out);
+                fileArg = 1;
+                break;
+            case "-disasm":
+                disasm = true;
                 fileArg = 1;
                 break;
             default:
@@ -245,6 +260,10 @@ public class AbsMach {
         }
 
         AbsMach am = new AbsMach(args[fileArg]);
+        if(disasm) {
+            DisAsm.disAsm(am.code, System.out);
+            return;
+        }
         am.go(tracer);
     }
 

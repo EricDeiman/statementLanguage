@@ -2,25 +2,43 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
 import java.util.List;
+import java.util.Vector;
+import java.util.HashMap;
 
 import common.ByteCodes;
 import common.CodeBuffer;
 import common.RuntimeType;
+import common.Labeller;
+import common.FixUp;
 
 import parser.*;
 
 public class Compile extends StmntBaseVisitor<Integer> {
-    public Compile() {
+    public Compile(Vector<String> names) {
         code = new CodeBuffer();
+        where = new HashMap<String, Integer>();
+        fixups = new FixUp();
+        mutables = names;
     }
 
     @Override
     public Integer visitProg(StmntParser.ProgContext ctx) {
         Integer answer = 0;
+
+        for(Integer i = 0; i < mutables.size(); i++) {
+            where.put(mutables.elementAt(i), i * 2);
+            code.writeByte(ByteCodes.Push.ordinal())
+                .writeByte(RuntimeType.iInteger.ordinal())
+                .writeInteger(0);
+        }
+
         for(StmntParser.StatementContext sctx : ctx.statement()) {
             answer = visit(sctx);
         }
         code.writeByte(ByteCodes.Halt.ordinal());
+
+        fixups.doFixups(where, code);
+
         return answer;
     }
 
@@ -41,6 +59,10 @@ public class Compile extends StmntBaseVisitor<Integer> {
     public Integer visitAssign(StmntParser.AssignContext ctx) {
         Integer value = visit(ctx.expression());
         String name = ctx.ID().getText();
+
+        code.writeByte(ByteCodes.Move.ordinal());
+        fixups.addFixup(name, code.getFinger());
+        code.writeInteger(0);
 
         return value;
     }
@@ -151,13 +173,17 @@ public class Compile extends StmntBaseVisitor<Integer> {
         return answer;
     }
 
-    // @Override
-    // public Integer visitId(StmntParser.IdContext ctx) {
-    //     String name = ctx.ID().getText();
-    //     return environment.get(name);
-    // }
+    @Override
+    public Integer visitId(StmntParser.IdContext ctx) {
+        String name = ctx.ID().getText();
 
-    // @Override
+        code.writeByte(ByteCodes.Copy.ordinal());
+        fixups.addFixup(name, code.getFinger());
+        code.writeInteger(0);
+
+        return 0;
+    }
+
     // public Integer visitStringExp(StmntParser.StringExpContext ctx)  {
     //     String value = ctx.STRING().getText();
     //     return new Integer(InterpType.iString, value);
@@ -266,4 +292,7 @@ public class Compile extends StmntBaseVisitor<Integer> {
     }
 
     private CodeBuffer code;
+    private Vector<String> mutables;
+    private HashMap<String, Integer> where;
+    private FixUp fixups;
 }

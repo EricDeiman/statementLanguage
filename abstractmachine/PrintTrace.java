@@ -20,18 +20,30 @@ public class PrintTrace extends EmptyTrace {
         Integer operand = 0;
         Integer type = 0;
         Boolean hasOperand = false;
+        Boolean hasOperandType = false;
 
         switch(opCode) {
         case Push:
             hasOperand = true;
+            hasOperandType = true;
             type = code.getByte(position + 1);
             operand = code.getInteger(position + 2);
             break;
+        case Move:
+            hasOperand = true;
+            hasOperandType = false;
+            operand = code.getInteger(position + 1);
+            break;
+        case Copy:
+            hasOperand = true;
+            hasOperandType = false;
+            operand = code.getInteger(position + 1);
+            break;
         }
 
-        String typeXStr = hasOperand ? String.format("%02x", type) : "";
+        String typeXStr = hasOperandType ? String.format("%02x", type) : "";
         String operandXStr = hasOperand ? String.format("%08x", operand) : "";
-        String typeDStr = hasOperand ? runtimeTypeCache[type].name() : "";
+        String typeDStr = hasOperandType ? runtimeTypeCache[type].name() : "";
         String operandDStr = hasOperand ? String.format("%d", operand) : "";
         out.print(String.format("%04x %02x %2s %8s   %-5s %8s %1s",
                                 position,

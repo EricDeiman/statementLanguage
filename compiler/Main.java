@@ -1,5 +1,5 @@
 import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.*;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -32,7 +32,11 @@ public class Main {
 
         if(parser.getNumberOfSyntaxErrors() == 0){
             try {
-                Compile compiler = new Compile();
+                MutableListener collectMutables = new MutableListener();
+                ParseTreeWalker walker = new ParseTreeWalker();
+                walker.walk(collectMutables, tree);
+
+                Compile compiler = new Compile(collectMutables.getNames());
                 compiler.visit(tree);
                 compiler.writeCodeTo(outputFileName);
             }
