@@ -333,6 +333,40 @@ public class AbsMach {
                           }
                           );
                 break;
+            case Jmp:
+                leftValue = code.readInteger();
+                exec.doIt((ignore) ->
+                          {
+                              code.setFinger(leftValue);
+                          }
+                          );
+                break;
+            case JmpT:
+                leftValue = code.readInteger();
+                exec.doIt((ignore) ->
+                          {
+                              rightValue = stack.pop();
+                              rightType = runtimeTypeCache[stack.pop()];
+                              expectType(RuntimeType.iBoolean, rightType, "test");
+                              if(rightValue == 1) {
+                                  code.setFinger(leftValue);
+                              }
+                          }
+                          );
+                break;
+            case JmpF:
+                leftValue = code.readInteger();
+                exec.doIt((ignore) ->
+                          {
+                              rightValue = stack.pop();
+                              rightType = runtimeTypeCache[stack.pop()];
+                              expectType(RuntimeType.iBoolean, rightType, "test");
+                              if(rightValue == 0) {
+                                  code.setFinger(leftValue);
+                              }
+                          }
+                          );
+                break;
             default:
                 break;
             }

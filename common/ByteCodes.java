@@ -23,4 +23,7 @@ public enum ByteCodes {
     Move,   // 0x13   // move top of stack to stack position given by parameter
     Copy,   // 0x14   // copy stack position given by parameter to top of stack
     PrtLn,  // 0x15   // print a new line to the console
+    Jmp,    // 0x16   // jump unconditionally to the parameter
+    JmpT,   // 0x17   // if the top of stack is true jump to parameter
+    JmpF,   // 0x18   // if the top of stack is false jump to parameter
 }

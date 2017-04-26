@@ -79,40 +79,91 @@ public class Compile extends StmntBaseVisitor<Integer> {
 
     @Override
     public Integer visitIfStmnt(StmntParser.IfStmntContext ctx) {
-        Integer answer = 0;
-        List<StmntParser.IfBlockContext> conditions = ctx.ifBlock();
 
+        List<StmntParser.IfBlockContext> conditions = ctx.ifBlock();
+        Boolean hasElse = ctx.block() != null;
+        Integer elseIfCount = Math.max(conditions.size() - 1, 0);
+
+        String ifEnd = labelMaker.make("ifEnd");
+        Vector<String> elseIfLabels = new Vector<String>();
+        for(int i = 0; i < elseIfCount; i++) {
+            elseIfLabels.add(labelMaker.make("elseIfBegin"));
+        }
+        String elseBegin = labelMaker.make("elseBegin");
+
+        Integer index = 0;
         for(StmntParser.IfBlockContext ifBlock : conditions) {
-            Integer result = visit(ifBlock.test);
-                answer = visit(ifBlock.body);
+            String jmpOnTestFail = ifEnd;
+
+            if(hasElse) {
+                jmpOnTestFail  = elseBegin;
             }
 
-        if(ctx.block() != null) {
-            answer = visit(ctx.block());
+            if(index < elseIfCount) {
+                jmpOnTestFail = elseIfLabels.get(index);
+            }
+
+            if(index > 0) {
+                where.put(elseIfLabels.get(index - 1), code.getFinger());
+            }
+
+            visit(ifBlock.test);
+            code.writeByte(ByteCodes.JmpF);
+            fixups.addFixup(jmpOnTestFail, code.getFinger());
+            code.writeInteger(0);
+
+            visit(ifBlock.body);
+            if(hasElse || elseIfCount > 0) {
+                code.writeByte(ByteCodes.Jmp);
+                fixups.addFixup(ifEnd, code.getFinger());
+                code.writeInteger(0);
+            }
+
+            index++;
         }
 
-        return answer;
+        if(hasElse) {
+            where.put(elseBegin, code.getFinger());
+
+            visit(ctx.block());
+        }
+
+        where.put(ifEnd, code.getFinger());
+
+        return 0;
     }
 
     @Override
     public Integer visitWhileStmnt(StmntParser.WhileStmntContext ctx) {
-        Integer answer = 0;
 
-        Integer result = visit(ctx.test);
-        answer = visit(ctx.body);
+        String whileBegin = labelMaker.make("whileBegin");
+        String whileEnd = labelMaker.make("whileEnd");
 
-        return answer;
+        where.put(whileBegin, code.getFinger());
+
+        visit(ctx.test);
+        code.writeByte(ByteCodes.JmpF);
+        fixups.addFixup(whileEnd, code.getFinger());
+        code.writeInteger(0);
+
+        visit(ctx.body);
+        code.writeByte(ByteCodes.Jmp);
+        fixups.addFixup(whileBegin, code.getFinger());
+        code.writeInteger(0);
+
+        where.put(whileEnd, code.getFinger());
+
+        return 0;
     }
 
     @Override
     public Integer visitBlock(StmntParser.BlockContext ctx) {
-        Integer answer = 0;
         //environment.beginScope();
         for(StmntParser.StatementContext sctx : ctx.statement()) {
-            answer = visit(sctx);
+            visit(sctx);
         }
         //environment.endScope();
-        return answer;
+        return 0;
     }
 
     @Override
