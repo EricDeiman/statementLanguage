@@ -124,6 +124,14 @@ public class CodeBuffer {
         return info4;
     }
 
+    public CodeBuffer writeByte(RuntimeType type) {
+        return writeByte(type.ordinal());
+    }
+
+    public CodeBuffer writeByte(ByteCodes op) {
+        return writeByte(op.ordinal());
+    }
+
     public CodeBuffer writeByte(int data) {
         byte info = (byte)data;
         data = data >>> 8;
@@ -227,6 +235,10 @@ public class CodeBuffer {
             throw new Error(e);
         }
         return true;
+    }
+
+    public Integer size() {
+        return core.size();
     }
 
     //------------------------------------------------------------------------------

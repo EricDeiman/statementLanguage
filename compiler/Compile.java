@@ -29,15 +29,15 @@ public class Compile extends StmntBaseVisitor<Integer> {
 
         for(Integer i = 0; i < mutables.size(); i++) {
             where.put(mutables.elementAt(i), i * 2);
-            code.writeByte(ByteCodes.Push.ordinal())
-                .writeByte(RuntimeType.iInteger.ordinal())
+            code.writeByte(ByteCodes.Push)
+                .writeByte(RuntimeType.iInteger)
                 .writeInteger(0);
         }
 
         for(StmntParser.StatementContext sctx : ctx.statement()) {
             answer = visit(sctx);
         }
-        code.writeByte(ByteCodes.Halt.ordinal());
+        code.writeByte(ByteCodes.Halt);
 
         // Dump the string pool past the end of the executable code
         for(String key : stringPool.keySet()) {
@@ -57,9 +57,10 @@ public class Compile extends StmntBaseVisitor<Integer> {
 
         for(StmntParser.ExpressionContext ectx : ctx.expression()) {
             answer = visit(ectx);
+            code.writeByte(ByteCodes.Print);
         }
 
-        code.writeByte(ByteCodes.Print.ordinal());
+        code.writeByte(ByteCodes.PrtLn);
 
         return answer;
     }
@@ -69,7 +70,7 @@ public class Compile extends StmntBaseVisitor<Integer> {
         Integer value = visit(ctx.expression());
         String name = ctx.ID().getText();
 
-        code.writeByte(ByteCodes.Move.ordinal());
+        code.writeByte(ByteCodes.Move);
         fixups.addFixup(name, code.getFinger());
         code.writeInteger(0);
 
@@ -138,7 +139,7 @@ public class Compile extends StmntBaseVisitor<Integer> {
     public Integer visitPower(StmntParser.PowerContext ctx) {
         visit(ctx.left);
         visit(ctx.right);
-        code.writeByte(ByteCodes.Pow.ordinal());
+        code.writeByte(ByteCodes.Pow);
         return 0;
     }
 
@@ -148,13 +149,13 @@ public class Compile extends StmntBaseVisitor<Integer> {
         visit(ctx.right);
         String op = ctx.op.getText();
         if(op.equals("*")) {
-            code.writeByte(ByteCodes.Mul.ordinal());
+            code.writeByte(ByteCodes.Mul);
         }
         else if(op.equals("div")) {
-            code.writeByte(ByteCodes.Div.ordinal());
+            code.writeByte(ByteCodes.Div);
         }
         else {
-            code.writeByte(ByteCodes.Rem.ordinal());
+            code.writeByte(ByteCodes.Rem);
         }
 
         return 0;
@@ -166,10 +167,10 @@ public class Compile extends StmntBaseVisitor<Integer> {
         visit(ctx.right);
         String op = ctx.op.getText();
         if(op.equals("+")) {
-            code.writeByte(ByteCodes.Add.ordinal());
+            code.writeByte(ByteCodes.Add);
         }
         else {
-            code.writeByte(ByteCodes.Sub.ordinal());
+            code.writeByte(ByteCodes.Sub);
         }
         return 0;
     }
@@ -177,7 +178,7 @@ public class Compile extends StmntBaseVisitor<Integer> {
     @Override
     public Integer visitNumber(StmntParser.NumberContext ctx) {
         Integer answer = Integer.valueOf(ctx.NUMBER().getText().replace("_", ""));
-        code.writeByte(ByteCodes.Push.ordinal()).writeByte(RuntimeType.iInteger.ordinal())
+        code.writeByte(ByteCodes.Push).writeByte(RuntimeType.iInteger)
             .writeInteger(answer);
         return answer;
     }
@@ -186,7 +187,7 @@ public class Compile extends StmntBaseVisitor<Integer> {
     public Integer visitId(StmntParser.IdContext ctx) {
         String name = ctx.ID().getText();
 
-        code.writeByte(ByteCodes.Copy.ordinal());
+        code.writeByte(ByteCodes.Copy);
         fixups.addFixup(name, code.getFinger());
         code.writeInteger(0);
 
@@ -198,10 +199,22 @@ public class Compile extends StmntBaseVisitor<Integer> {
         String value = ctx.STRING().getText();
         value = value.substring(1);
         value = value.substring(0, value.length() - 1);
-        String label = labelMaker.make("string");
-        stringPool.put(label, value);
+        value = value.intern();
 
-        code.writeByte(ByteCodes.Push.ordinal()).writeByte(RuntimeType.iString.ordinal());
+        String label = null;
+        if(!stringPool.containsValue(value)) {
+            label = labelMaker.make("string");
+            stringPool.put(label, value);
+        }
+        else {
+            for(String key : stringPool.keySet()) {
+                if(stringPool.get(key) == value) {
+                    label = key;
+                }
+            }
+        }
+
+        code.writeByte(ByteCodes.Push).writeByte(RuntimeType.iString);
         fixups.addFixup(label, code.getFinger());
         code.writeInteger(0);
 
@@ -216,7 +229,7 @@ public class Compile extends StmntBaseVisitor<Integer> {
     @Override
     public Integer visitLogicNot(StmntParser.LogicNotContext ctx) {
         visit(ctx.logicExp());
-        code.writeByte(ByteCodes.Not.ordinal());
+        code.writeByte(ByteCodes.Not);
         return 0;
     }
 
@@ -224,7 +237,7 @@ public class Compile extends StmntBaseVisitor<Integer> {
     public Integer visitLogicAnd(StmntParser.LogicAndContext ctx) {
         visit(ctx.left);
         visit(ctx.right);
-        code.writeByte(ByteCodes.And.ordinal());
+        code.writeByte(ByteCodes.And);
         return 0;
     }
 
@@ -232,7 +245,7 @@ public class Compile extends StmntBaseVisitor<Integer> {
     public Integer visitLogicOr(StmntParser.LogicOrContext ctx) {
         visit(ctx.left);
         visit(ctx.right);
-        code.writeByte(ByteCodes.Or.ordinal());
+        code.writeByte(ByteCodes.Or);
         return 0;
     }
 
@@ -259,14 +272,14 @@ public class Compile extends StmntBaseVisitor<Integer> {
 
     @Override
     public Integer visitLitTrue(StmntParser.LitTrueContext ctx) {
-        code.writeByte(ByteCodes.Push.ordinal()).writeByte(RuntimeType.iBoolean.ordinal())
+        code.writeByte(ByteCodes.Push).writeByte(RuntimeType.iBoolean)
             .writeInteger(1);
         return 0;
     }
 
     @Override
     public Integer visitLitFalse(StmntParser.LitFalseContext ctx) {
-        code.writeByte(ByteCodes.Push.ordinal()).writeByte(RuntimeType.iBoolean.ordinal())
+        code.writeByte(ByteCodes.Push).writeByte(RuntimeType.iBoolean)
             .writeInteger(0);
         return 0;
     }
@@ -278,22 +291,22 @@ public class Compile extends StmntBaseVisitor<Integer> {
         String op = ctx.op.getText();
         switch(op) {
         case "<":
-            code.writeByte(ByteCodes.Lt.ordinal());
+            code.writeByte(ByteCodes.Lt);
             break;
         case "<=":
-            code.writeByte(ByteCodes.Lte.ordinal());
+            code.writeByte(ByteCodes.Lte);
             break;
         case "?=":
-            code.writeByte(ByteCodes.Eq.ordinal());
+            code.writeByte(ByteCodes.Eq);
             break;
         case "!=":
-            code.writeByte(ByteCodes.Neq.ordinal());
+            code.writeByte(ByteCodes.Neq);
             break;
         case ">=":
-            code.writeByte(ByteCodes.Gte.ordinal());
+            code.writeByte(ByteCodes.Gte);
             break;
         case ">":
-            code.writeByte(ByteCodes.Gt.ordinal());
+            code.writeByte(ByteCodes.Gt);
         }
         return 0;
     }

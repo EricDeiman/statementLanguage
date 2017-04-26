@@ -11,6 +11,7 @@ public class PrintTrace extends EmptyTrace {
         this.out = out;
         runtimeTypeCache = RuntimeType.values();
         byteCodesCache = ByteCodes.values();
+        needsNewLine = false;
     }
 
     public void preInstruction(CodeBuffer code, Stack<Integer> stack) {
@@ -21,6 +22,8 @@ public class PrintTrace extends EmptyTrace {
         Integer type = 0;
         Boolean hasOperand = false;
         Boolean hasOperandType = false;
+
+        needsNewLine = false;
 
         switch(opCode) {
         case Push:
@@ -39,13 +42,16 @@ public class PrintTrace extends EmptyTrace {
             hasOperandType = false;
             operand = code.getInteger(position + 1);
             break;
+        case Print:
+            needsNewLine = true;
+            break;
         }
 
         String typeXStr = hasOperandType ? String.format("%02x", type) : "";
         String operandXStr = hasOperand ? String.format("%08x", operand) : "";
         String typeDStr = hasOperandType ? runtimeTypeCache[type].name() : "";
         String operandDStr = hasOperand ? String.format("%d", operand) : "";
-        out.print(String.format("%04x:  %02x %2s %8s   %-5s %-8s %1s",
+        out.print(String.format("%04x:  %02x %2s %8s   %-5s %-8s %-8s",
                                 position,
                                 opCode.ordinal(),
                                 typeXStr,
@@ -65,7 +71,30 @@ public class PrintTrace extends EmptyTrace {
         return;
     }
 
+    public void postInstruction(CodeBuffer code, Stack<Integer> stack) {
+        if(needsNewLine) {
+            System.out.println();
+        }
+    }
+
+    public void postProgram(CodeBuffer code, Stack<Integer> stack) {
+        // Let's look for the string pool
+        while(code.getFinger() < code.size()) {
+            // There's more stuff past the halt op code.  Assume it's a string pool.
+            Integer position = code.getFinger();
+
+            StringBuilder sb = new StringBuilder();
+            while(code.getByte(code.getFinger()) != 0) {
+                sb.append((char)code.readByte());
+            }
+            code.readByte(); // ignore the terminating zero byte
+
+            out.println(String.format("%04x:  %s", position, sb.toString()));
+        }
+    }
+
     private PrintStream out;
     private RuntimeType[] runtimeTypeCache;
     private ByteCodes[] byteCodesCache;
+    private Boolean needsNewLine;
 }

@@ -25,6 +25,8 @@ public class AbsMach {
     }
 
     public Integer go(Trace trace, Executor exec) {
+        trace.preProgram(code, stack);
+        
         loop:
         while(true) {
             trace.preInstruction(code, stack);
@@ -285,23 +287,24 @@ public class AbsMach {
                               rightType = runtimeTypeCache[stack.pop()];
                               switch(rightType) {
                               case iInteger:
-                                  System.out.println(rightValue);
+                                  System.out.print(rightValue);
                                   break;
                               case iBoolean:
-                                  System.out.println(rightValue == 1);
+                                  System.out.print(rightValue == 1);
                                   break;
                               case iString:
                                   StringBuilder sb = new StringBuilder();
                                   while(code.getByte(rightValue) != 0) {
                                       sb.append((char)code.getByte(rightValue++));
                                   }
-                                  System.out.println(sb.toString());
+                                  System.out.print(sb.toString());
                                   break;
                               default:
-                                  System.out.println("don't now how to print type " +
+                                  System.err.println("don't now how to print type " +
                                                      rightType);
                                   break;
                               }
+                              System.out.print(" ");
                           }
                           );
                 break;
@@ -323,11 +326,19 @@ public class AbsMach {
                           }
                           );
                 break;
+            case PrtLn:
+                exec.doIt((ignore) ->
+                          {
+                              System.out.println();
+                          }
+                          );
+                break;
             default:
                 break;
             }
             trace.postInstruction(code, stack);
         }
+        trace.postProgram(code, stack);
         return stack.size();
     }
 

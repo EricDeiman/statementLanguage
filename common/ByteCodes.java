@@ -19,7 +19,8 @@ public enum ByteCodes {
     And,    // 0x0f
     Or,     // 0x10
     Not,    // 0x11
-    Print,  // 0x12
+    Print,  // 0x12   // print parameter followed by space to the console
     Move,   // 0x13   // move top of stack to stack position given by parameter
     Copy,   // 0x14   // copy stack position given by parameter to top of stack
+    PrtLn,  // 0x15   // print a new line to the console
 }
