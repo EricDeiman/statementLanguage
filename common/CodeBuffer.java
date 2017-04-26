@@ -32,21 +32,21 @@ public class CodeBuffer {
     }
 
     public int getByte(int at) {
-        return (int)core.elementAt(at);
+        return 0x000000FF & ((int)core.elementAt(at));
     }
 
     public int getShort(int at) {
-        int info2 = (int)core.elementAt(at);
-        byte info1 = core.elementAt(at + 1);
+        int info2 = 0x000000FF & ((int)core.elementAt(at));
+        int info1 = 0x000000FF & ((int)core.elementAt(at + 1));
         info2 = info2 << 8 | info1;
         return info2;
     }
 
     public int getInteger(int at) {
-        int info4 = (int)core.elementAt(at);
-        byte info3 = core.elementAt(at + 1);
-        byte info2 = core.elementAt(at + 2);
-        byte info1 = core.elementAt(at + 3);
+        int info4 = 0x000000FF & ((int)core.elementAt(at));
+        int info3 = 0x000000FF & ((int)core.elementAt(at + 1));
+        int info2 = 0x000000FF & ((int)core.elementAt(at + 2));
+        int info1 = 0x000000FF & ((int)core.elementAt(at + 3));
         info4 = info4 << 8 | info3;
         info4 = info4 << 8 | info2;
         info4 = info4 << 8 | info1;
@@ -103,21 +103,21 @@ public class CodeBuffer {
     }
 
     public int readByte() {
-        return (int)core.elementAt(finger++);
+        return 0x000000FF & ((int)core.elementAt(finger++));
     }
 
     public int readShort() {
-        int info2 = (int)core.elementAt(finger++);
-        byte info1 = core.elementAt(finger++);
+        int info2 = 0x000000FF & ((int)core.elementAt(finger++));
+        int info1 = 0x000000FF & ((int)core.elementAt(finger++));
         info2 = info2 << 8 | info1;
         return info2;
     }
 
     public int readInteger() {
-        int info4 = (int)core.elementAt(finger++);
-        byte info3 = core.elementAt(finger++);
-        byte info2 = core.elementAt(finger++);
-        byte info1 = core.elementAt(finger++);
+        int info4 = 0x000000FF & ((int)core.elementAt(finger++));
+        int info3 = 0x000000FF & ((int)core.elementAt(finger++));
+        int info2 = 0x000000FF & ((int)core.elementAt(finger++));
+        int info1 = 0x000000FF & ((int)core.elementAt(finger++));
         info4 = info4 << 8 | info3;
         info4 = info4 << 8 | info2;
         info4 = info4 << 8 | info1;
@@ -161,6 +161,13 @@ public class CodeBuffer {
         core.add(finger++, info3);
         core.add(finger++, info2);
         core.add(finger++, info1);
+        return this;
+    }
+
+    public CodeBuffer writeString(String data) {
+        for(byte b : data.getBytes()) {
+            core.add(finger++, b);
+        }
         return this;
     }
 

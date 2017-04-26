@@ -6,3 +6,7 @@ print b ;
 print c ;
 print a < 8 ;
 print true ;
+thing1 <- "This is Thing 1." ;
+thing2 <- "This is Thing 2." ;
+print thing1 ;
+print thing2 ;

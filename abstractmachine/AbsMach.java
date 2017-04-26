@@ -290,6 +290,13 @@ public class AbsMach {
                               case iBoolean:
                                   System.out.println(rightValue == 1);
                                   break;
+                              case iString:
+                                  StringBuilder sb = new StringBuilder();
+                                  while(code.getByte(rightValue) != 0) {
+                                      sb.append((char)code.getByte(rightValue++));
+                                  }
+                                  System.out.println(sb.toString());
+                                  break;
                               default:
                                   System.out.println("don't now how to print type " +
                                                      rightType);

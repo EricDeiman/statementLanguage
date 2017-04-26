@@ -19,6 +19,8 @@ public class Compile extends StmntBaseVisitor<Integer> {
         where = new HashMap<String, Integer>();
         fixups = new FixUp();
         mutables = names;
+        stringPool = new HashMap<String, String>();
+        labelMaker = new Labeller();
     }
 
     @Override
@@ -36,6 +38,13 @@ public class Compile extends StmntBaseVisitor<Integer> {
             answer = visit(sctx);
         }
         code.writeByte(ByteCodes.Halt.ordinal());
+
+        // Dump the string pool past the end of the executable code
+        for(String key : stringPool.keySet()) {
+            where.put(key, code.getFinger());
+            code.writeString(stringPool.get(key));
+            code.writeByte(0); // zero terminate strings in the image
+        }
 
         fixups.doFixups(where, code);
 
@@ -184,10 +193,20 @@ public class Compile extends StmntBaseVisitor<Integer> {
         return 0;
     }
 
-    // public Integer visitStringExp(StmntParser.StringExpContext ctx)  {
-    //     String value = ctx.STRING().getText();
-    //     return new Integer(InterpType.iString, value);
-    // }
+    @Override
+    public Integer visitStringExp(StmntParser.StringExpContext ctx)  {
+        String value = ctx.STRING().getText();
+        value = value.substring(1);
+        value = value.substring(0, value.length() - 1);
+        String label = labelMaker.make("string");
+        stringPool.put(label, value);
+
+        code.writeByte(ByteCodes.Push.ordinal()).writeByte(RuntimeType.iString.ordinal());
+        fixups.addFixup(label, code.getFinger());
+        code.writeInteger(0);
+
+        return 0;
+    }
 
     @Override
     public Integer visitLogicGroup(StmntParser.LogicGroupContext ctx ) {
@@ -295,4 +314,6 @@ public class Compile extends StmntBaseVisitor<Integer> {
     private Vector<String> mutables;
     private HashMap<String, Integer> where;
     private FixUp fixups;
+    private HashMap<String, String> stringPool;
+    private Labeller labelMaker;
 }
