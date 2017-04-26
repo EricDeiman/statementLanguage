@@ -45,7 +45,7 @@ public class PrintTrace extends EmptyTrace {
         String operandXStr = hasOperand ? String.format("%08x", operand) : "";
         String typeDStr = hasOperandType ? runtimeTypeCache[type].name() : "";
         String operandDStr = hasOperand ? String.format("%d", operand) : "";
-        out.print(String.format("%04x %02x %2s %8s   %-5s %8s %1s",
+        out.print(String.format("%04x:  %02x %2s %8s   %-5s %-8s %1s",
                                 position,
                                 opCode.ordinal(),
                                 typeXStr,
