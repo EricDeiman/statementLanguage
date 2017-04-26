@@ -1,2 +1,2 @@
 Main-class: Main
-Class-Path: ../jars/Stmnt.jar ../jars/antlr-runtime-4.7.jar ../jars/common.jar
+Class-Path: ../lib/Stmnt.jar ../lib/antlr-runtime-4.7.jar ../lib/common.jar

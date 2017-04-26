@@ -17,7 +17,7 @@ $(JARNAME) : $(GRAMMAR)
 	$(ANTLR4) $(ANTLR4FLAGS) $<
 	$(JAVAC) $(JAVACFLAGS) *.java
 	$(JAR) $(JARFLAGS) $(JARNAME) ../parser/*.class
-	cp $(JARNAME) ../jars/.
+	cp $(JARNAME) ../lib/.
 
 .PHONY : clean scrub
 

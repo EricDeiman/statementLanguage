@@ -1,6 +1,6 @@
 JAVAC=javac
-JARS:=../jars/
-JAVACFLAGS:=-cp $(CLASSPATH)../jars/Stmnt.jar:../jars/common.jar
+JARS:=../bin/
+JAVACFLAGS:=-cp $(CLASSPATH)../lib/Stmnt.jar:../lib/common.jar
 JAR=jar
 JARFLAGS=cfm
 CP:= cp

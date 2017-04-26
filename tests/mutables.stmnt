@@ -4,3 +4,5 @@ c <- 9 ;
 print a ;
 print b ;
 print c ;
+print a < 8 ;
+print true ;
