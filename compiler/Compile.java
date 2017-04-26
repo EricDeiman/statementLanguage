@@ -82,7 +82,7 @@ public class Compile extends StmntBaseVisitor<Integer> {
 
         List<StmntParser.IfBlockContext> conditions = ctx.ifBlock();
         Boolean hasElse = ctx.block() != null;
-        Integer elseIfCount = Math.max(conditions.size() - 1, 0);
+        Integer elseIfCount = conditions.size() - 1;
 
         String ifEnd = labelMaker.make("ifEnd");
         Vector<String> elseIfLabels = new Vector<String>();
@@ -93,14 +93,14 @@ public class Compile extends StmntBaseVisitor<Integer> {
 
         Integer index = 0;
         for(StmntParser.IfBlockContext ifBlock : conditions) {
-            String jmpOnTestFail = ifEnd;
+            String jmpOnTestFalse = ifEnd;
 
             if(hasElse) {
-                jmpOnTestFail  = elseBegin;
+                jmpOnTestFalse  = elseBegin;
             }
 
             if(index < elseIfCount) {
-                jmpOnTestFail = elseIfLabels.get(index);
+                jmpOnTestFalse = elseIfLabels.get(index);
             }
 
             if(index > 0) {
@@ -109,11 +109,11 @@ public class Compile extends StmntBaseVisitor<Integer> {
 
             visit(ifBlock.test);
             code.writeByte(ByteCodes.JmpF);
-            fixups.addFixup(jmpOnTestFail, code.getFinger());
+            fixups.addFixup(jmpOnTestFalse, code.getFinger());
             code.writeInteger(0);
 
             visit(ifBlock.body);
-            if(hasElse || elseIfCount > 0) {
+            if(hasElse || (index < elseIfCount)) {
                 code.writeByte(ByteCodes.Jmp);
                 fixups.addFixup(ifEnd, code.getFinger());
                 code.writeInteger(0);
