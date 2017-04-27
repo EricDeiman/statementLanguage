@@ -26,4 +26,7 @@ public enum ByteCodes {
     Jmp,    // 0x16   // jump unconditionally to the parameter
     JmpT,   // 0x17   // if the top of stack is true jump to parameter
     JmpF,   // 0x18   // if the top of stack is false jump to parameter
+    Enter,  // 0x19   // enter a new scope
+    Exit,   // 0x1a   // exiti a scope
+    Locals, // 0x1b   // reserve parameter number of stack slots
 }

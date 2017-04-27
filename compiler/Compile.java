@@ -27,11 +27,9 @@ public class Compile extends StmntBaseVisitor<Integer> {
     public Integer visitProg(StmntParser.ProgContext ctx) {
         Integer answer = 0;
 
+        code.writeByte(ByteCodes.Locals).writeInteger(mutables.size() * 2);
         for(Integer i = 0; i < mutables.size(); i++) {
-            where.put(mutables.elementAt(i), i * 2);
-            code.writeByte(ByteCodes.Push)
-                .writeByte(RuntimeType.iInteger)
-                .writeInteger(0);
+            where.put(mutables.elementAt(i), (i * 2) + 1);
         }
 
         for(StmntParser.StatementContext sctx : ctx.statement()) {
@@ -159,9 +157,11 @@ public class Compile extends StmntBaseVisitor<Integer> {
     @Override
     public Integer visitBlock(StmntParser.BlockContext ctx) {
         //environment.beginScope();
+        code.writeByte(ByteCodes.Enter);
         for(StmntParser.StatementContext sctx : ctx.statement()) {
             visit(sctx);
         }
+        code.writeByte(ByteCodes.Exit);
         //environment.endScope();
         return 0;
     }

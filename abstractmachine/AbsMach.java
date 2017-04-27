@@ -25,6 +25,13 @@ public class AbsMach {
     }
 
     public Integer go(Trace trace, Executor exec) {
+        exec.doIt((ignore) ->
+                  {
+                      stack.push(1);
+                      frameBase = 1;
+                  }
+                  );
+
         trace.preProgram(code, stack);
         
         loop:
@@ -367,6 +374,35 @@ public class AbsMach {
                           }
                           );
                 break;
+            case Enter:
+                exec.doIt ((ignore) ->
+                           {
+                               stack.push(frameBase);
+                               frameBase = stack.size();
+                           }
+                           );
+                break;
+            case Exit:
+                exec.doIt((ignore) ->
+                          {
+                              while(stack.size() > frameBase) {
+                                  stack.pop();
+                              }
+                              frameBase = stack.pop();
+                          }
+                          );
+                break;
+            case Locals:
+                leftValue = code.readInteger();
+                exec.doIt((ignore) ->
+                          {
+                              while(leftValue > 0) {
+                                  stack.push(0);
+                                  leftValue--;
+                              }
+                          }
+                          );
+                break;
             default:
                 break;
             }
@@ -446,4 +482,5 @@ public class AbsMach {
     private Integer rightValue;
     private RuntimeType[] runtimeTypeCache;
     private ByteCodes[] byteCodesCache;
+    private Integer frameBase;
 }

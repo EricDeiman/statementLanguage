@@ -37,6 +37,7 @@ public class PrintTrace extends EmptyTrace {
         case Jmp:
         case JmpT:
         case JmpF:
+        case Locals:
             hasOperand = true;
             hasOperandType = false;
             operand = code.getInteger(position + 1);
@@ -50,7 +51,7 @@ public class PrintTrace extends EmptyTrace {
         String operandXStr = hasOperand ? String.format("%08x", operand) : "";
         String typeDStr = hasOperandType ? runtimeTypeCache[type].name() : "";
         String operandDStr = hasOperand ? String.format("%d", operand) : "";
-        out.print(String.format("%04x:  %02x %2s %8s   %-5s %-8s %-8s",
+        out.print(String.format("%04x:  %02x %2s %8s   %-6s %-8s %-8s",
                                 position,
                                 opCode.ordinal(),
                                 typeXStr,
