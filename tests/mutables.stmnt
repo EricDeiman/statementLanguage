@@ -46,4 +46,8 @@ else {
      print "I don't know." ;
 }
 
+empty <- "" ;
+print "What happens now?" empty ;
+print "What happened?" ;
+
 print "That's all folks!" ;

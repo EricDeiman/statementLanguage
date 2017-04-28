@@ -72,8 +72,8 @@ public class PrintTrace extends EmptyTrace {
     }
 
     public void postInstruction(CodeBuffer code, Stack<Integer> stack) {
-        if(needsNewLine) {
-            System.out.println();
+        if(needsNewLine && out == System.out) {
+            out.println();
         }
     }
 

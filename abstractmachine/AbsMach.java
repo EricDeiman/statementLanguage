@@ -1,4 +1,6 @@
 import java.io.InputStream;
+import java.io.File;
+import java.io.PrintStream;
 import java.util.Stack;
 
 import common.ByteCodes;
@@ -412,8 +414,8 @@ public class AbsMach {
         return stack.size();
     }
 
-    public static void main(String[] args) {
-        if(args.length != 1 && args.length != 2) {
+    public static void main(String[] args) throws Exception {
+        if(args.length != 1 && args.length != 2 && args.length != 3) {
             System.err.println("program needs to be called with a statement language " +
                                "object file.");
             return;
@@ -423,7 +425,7 @@ public class AbsMach {
         int fileArg = 0;
         Executor exec = new Exec();
 
-        if(args.length == 2) {
+        if(args.length == 2 || args.length == 3) {
             switch(args[0]) {
             case "-print":
                 tracer = new PrintTrace(System.out);
@@ -433,6 +435,10 @@ public class AbsMach {
                 tracer = new PrintTrace(System.out);
                 exec = new NoOp();
                 fileArg = 1;
+                break;
+            case "-dump":
+                tracer = new PrintTrace(new PrintStream(new File(args[1])));
+                fileArg = 2;
                 break;
             default:
                 fileArg = 1;

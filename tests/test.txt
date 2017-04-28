@@ -82,6 +82,10 @@ print "";
 n <- 4_2;
 print "Fourty-two:" n ;
 
+empty <- "" ;
+print "What does this print?" empty ;
+print "What happened?" ;
+
 # Let's end with a run-time error:
 one <- 1;
 two <- "Two";
