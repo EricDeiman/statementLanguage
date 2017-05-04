@@ -14,7 +14,7 @@ public class PrintTrace extends EmptyTrace {
         needsNewLine = false;
     }
 
-    public void preInstruction(CodeBuffer code, Stack<Integer> stack) {
+    public void preInstruction(CodeBuffer code, Stack<Integer> stack, Integer frame) {
         Integer position = code.getFinger();
         ByteCodes opCode = byteCodesCache[code.getByte(position)];
         StringBuilder buffer = new StringBuilder();
@@ -62,8 +62,14 @@ public class PrintTrace extends EmptyTrace {
 
         out.print("  [ ");
         if(stack.size() > 0) {
+            if(frame == stack.size()) {
+                out.print("| ");
+            }
             for(int i = stack.size() - 1; i > -1; i--) {
                 out.print(String.format("%d ", stack.elementAt(i)));
+                if(i == frame) {
+                    out.print("| ");
+                }
             }
         }
         out.println(" ]");
@@ -71,13 +77,13 @@ public class PrintTrace extends EmptyTrace {
         return;
     }
 
-    public void postInstruction(CodeBuffer code, Stack<Integer> stack) {
+    public void postInstruction(CodeBuffer code, Stack<Integer> stack, Integer frame) {
         if(needsNewLine && out == System.out) {
             out.println();
         }
     }
 
-    public void postProgram(CodeBuffer code, Stack<Integer> stack) {
+    public void postProgram(CodeBuffer code, Stack<Integer> stack, Integer frame) {
         // Let's look for the string pool
         while(code.getFinger() < code.size()) {
             // There's more stuff past the halt op code.  Assume it's a string pool.

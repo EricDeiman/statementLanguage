@@ -9,7 +9,7 @@ import common.ByteCodes;
 import common.CodeBuffer;
 import common.RuntimeType;
 import common.Labeller;
-import common.FixUp;
+import common.BackPatch;
 
 import parser.*;
 
@@ -17,7 +17,7 @@ public class Compile extends StmntBaseVisitor<Integer> {
     public Compile(Vector<String> names) {
         code = new CodeBuffer();
         where = new HashMap<String, Integer>();
-        fixups = new FixUp();
+        backPatches = new BackPatch();
         mutables = names;
         stringPool = new HashMap<String, String>();
         labelMaker = new Labeller();
@@ -44,7 +44,7 @@ public class Compile extends StmntBaseVisitor<Integer> {
             code.writeByte(0); // zero terminate strings in the image
         }
 
-        fixups.doFixups(where, code);
+        backPatches.doBackPatches(where, code);
 
         return answer;
     }
@@ -69,7 +69,7 @@ public class Compile extends StmntBaseVisitor<Integer> {
         String name = ctx.ID().getText();
 
         code.writeByte(ByteCodes.Move);
-        fixups.addFixup(name, code.getFinger());
+        backPatches.addBackPatch(name, code.getFinger());
         code.writeInteger(0);
 
         return value;
@@ -107,13 +107,13 @@ public class Compile extends StmntBaseVisitor<Integer> {
 
             visit(ifBlock.test);
             code.writeByte(ByteCodes.JmpF);
-            fixups.addFixup(jmpOnTestFalse, code.getFinger());
+            backPatches.addBackPatch(jmpOnTestFalse, code.getFinger());
             code.writeInteger(0);
 
             visit(ifBlock.body);
             if(hasElse || (index < elseIfCount)) {
                 code.writeByte(ByteCodes.Jmp);
-                fixups.addFixup(ifEnd, code.getFinger());
+                backPatches.addBackPatch(ifEnd, code.getFinger());
                 code.writeInteger(0);
             }
 
@@ -141,12 +141,12 @@ public class Compile extends StmntBaseVisitor<Integer> {
 
         visit(ctx.test);
         code.writeByte(ByteCodes.JmpF);
-        fixups.addFixup(whileEnd, code.getFinger());
+        backPatches.addBackPatch(whileEnd, code.getFinger());
         code.writeInteger(0);
 
         visit(ctx.body);
         code.writeByte(ByteCodes.Jmp);
-        fixups.addFixup(whileBegin, code.getFinger());
+        backPatches.addBackPatch(whileBegin, code.getFinger());
         code.writeInteger(0);
 
         where.put(whileEnd, code.getFinger());
@@ -239,7 +239,7 @@ public class Compile extends StmntBaseVisitor<Integer> {
         String name = ctx.ID().getText();
 
         code.writeByte(ByteCodes.Copy);
-        fixups.addFixup(name, code.getFinger());
+        backPatches.addBackPatch(name, code.getFinger());
         code.writeInteger(0);
 
         return 0;
@@ -266,7 +266,7 @@ public class Compile extends StmntBaseVisitor<Integer> {
         }
 
         code.writeByte(ByteCodes.Push).writeByte(RuntimeType.iString);
-        fixups.addFixup(label, code.getFinger());
+        backPatches.addBackPatch(label, code.getFinger());
         code.writeInteger(0);
 
         return 0;
@@ -377,7 +377,7 @@ public class Compile extends StmntBaseVisitor<Integer> {
     private CodeBuffer code;
     private Vector<String> mutables;
     private HashMap<String, Integer> where;
-    private FixUp fixups;
+    private BackPatch backPatches;
     private HashMap<String, String> stringPool;
     private Labeller labelMaker;
 }

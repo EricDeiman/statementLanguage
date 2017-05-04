@@ -3,3 +3,5 @@
 ./jars
 *.o
 *.log
+*.stmnt.c
+*.stmnt.i

@@ -34,11 +34,11 @@ public class AbsMach {
                   }
                   );
 
-        trace.preProgram(code, stack);
+        trace.preProgram(code, stack, frameBase);
         
         loop:
         while(true) {
-            trace.preInstruction(code, stack);
+            trace.preInstruction(code, stack, frameBase);
             switch(byteCodesCache[code.readByte()]) {
             case Halt:
                 break loop;
@@ -408,9 +408,9 @@ public class AbsMach {
             default:
                 break;
             }
-            trace.postInstruction(code, stack);
+            trace.postInstruction(code, stack, frameBase);
         }
-        trace.postProgram(code, stack);
+        trace.postProgram(code, stack, frameBase);
         return stack.size();
     }
 
