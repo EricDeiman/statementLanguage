@@ -71,9 +71,9 @@ public class Compile extends StmntBaseVisitor<Integer> {
         Integer value = visit(ctx.expression());
         String name = ctx.ID().getText();
 
-        LookupPair here = currentScope.get(name);
-        code.writeByte(ByteCodes.Move).writeInteger(here.frames)
-            .writeInteger(here.offset * 2);
+        LookupPair location = currentScope.get(name);
+        code.writeByte(ByteCodes.Move).writeInteger(location.frames)
+            .writeInteger(location.offset * 2);
 
         return value;
     }
@@ -247,9 +247,9 @@ public class Compile extends StmntBaseVisitor<Integer> {
     public Integer visitId(StmntParser.IdContext ctx) {
         String name = ctx.ID().getText();
 
-        LookupPair here = currentScope.get(name);
-        code.writeByte(ByteCodes.Copy).writeInteger(here.frames)
-            .writeInteger(here.offset * 2);
+        LookupPair location = currentScope.get(name);
+        code.writeByte(ByteCodes.Copy).writeInteger(location.frames)
+            .writeInteger(location.offset * 2);
 
         return 0;
     }
