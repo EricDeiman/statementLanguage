@@ -35,7 +35,7 @@ public class AbsMach {
                   );
 
         trace.preProgram(code, stack, frameBase);
-        
+
         loop:
         while(true) {
             trace.preInstruction(code, stack, frameBase);
@@ -165,10 +165,17 @@ public class AbsMach {
                               leftValue = stack.pop();
                               leftType = runtimeTypeCache[stack.pop()];
 
-                              expectTypes(RuntimeType.iInteger, leftType, rightType,
-                                          "'<'");
-
-                              pushBoolean(leftValue < rightValue);
+                              if(leftType == RuntimeType.iString &&
+                                 rightType == RuntimeType.iString) {
+                                  String leftString = getString(leftValue);
+                                  String rightString = getString(rightValue);
+                                  pushBoolean(leftString.compareTo(rightString) < 0);
+                              }
+                              else {
+                                  expectTypes(RuntimeType.iInteger, leftType, rightType,
+                                              "'<'");
+                                  pushBoolean(leftValue < rightValue);
+                              }
                           }
                           );
                 break;
@@ -180,10 +187,17 @@ public class AbsMach {
                               leftValue = stack.pop();
                               leftType = runtimeTypeCache[stack.pop()];
 
-                              expectTypes(RuntimeType.iInteger, leftType, rightType,
-                                          "'<='");
-
-                              pushBoolean(leftValue <= rightValue);
+                              if(leftType == RuntimeType.iString &&
+                                 rightType == RuntimeType.iString) {
+                                  String leftString = getString(leftValue);
+                                  String rightString = getString(rightValue);
+                                  pushBoolean(leftString.compareTo(rightString) <= 0);
+                              }
+                              else {
+                                  expectTypes(RuntimeType.iInteger, leftType, rightType,
+                                              "'<='");
+                                  pushBoolean(leftValue <= rightValue);
+                              }
                           }
                           );
                 break;
@@ -195,10 +209,17 @@ public class AbsMach {
                               leftValue = stack.pop();
                               leftType = runtimeTypeCache[stack.pop()];
 
-                              expectTypes(RuntimeType.iInteger, leftType, rightType,
-                                          "?='");
-
-                              pushBoolean(leftValue == rightValue);
+                              if(leftType == RuntimeType.iString &&
+                                 rightType == RuntimeType.iString) {
+                                  String leftString = getString(leftValue);
+                                  String rightString = getString(rightValue);
+                                  pushBoolean(leftString.compareTo(rightString) == 0);
+                              }
+                              else {
+                                  expectTypes(RuntimeType.iInteger, leftType, rightType,
+                                              "'?='");
+                                  pushBoolean(leftValue == rightValue);
+                              }
                           }
                           );
                 break;
@@ -210,10 +231,17 @@ public class AbsMach {
                               leftValue = stack.pop();
                               leftType = runtimeTypeCache[stack.pop()];
 
-                              expectTypes(RuntimeType.iInteger, leftType, rightType,
-                                          "'!='");
-
-                              pushBoolean(leftValue != rightValue);
+                              if(leftType == RuntimeType.iString &&
+                                 rightType == RuntimeType.iString) {
+                                  String leftString = getString(leftValue);
+                                  String rightString = getString(rightValue);
+                                  pushBoolean(leftString.compareTo(rightString) != 0);
+                              }
+                              else {
+                                  expectTypes(RuntimeType.iInteger, leftType, rightType,
+                                              "'!='");
+                                  pushBoolean(leftValue != rightValue);
+                              }
                           }
                           );
                 break;
@@ -225,10 +253,17 @@ public class AbsMach {
                               leftValue = stack.pop();
                               leftType = runtimeTypeCache[stack.pop()];
 
-                              expectTypes(RuntimeType.iInteger, leftType, rightType,
-                                          "'>='");
-
-                              pushBoolean(leftValue >= rightValue);
+                              if(leftType == RuntimeType.iString &&
+                                 rightType == RuntimeType.iString) {
+                                  String leftString = getString(leftValue);
+                                  String rightString = getString(rightValue);
+                                  pushBoolean(leftString.compareTo(rightString) >= 0);
+                              }
+                              else {
+                                  expectTypes(RuntimeType.iInteger, leftType, rightType,
+                                              "'>='");
+                                  pushBoolean(leftValue >= rightValue);
+                              }
                           }
                           );
                 break;
@@ -240,10 +275,17 @@ public class AbsMach {
                               leftValue = stack.pop();
                               leftType = runtimeTypeCache[stack.pop()];
 
-                              expectTypes(RuntimeType.iInteger, leftType, rightType,
-                                          "'>'");
-
-                              pushBoolean(leftValue > rightValue);
+                              if(leftType == RuntimeType.iString &&
+                                 rightType == RuntimeType.iString) {
+                                  String leftString = getString(leftValue);
+                                  String rightString = getString(rightValue);
+                                  pushBoolean(leftString.compareTo(rightString) > 0);
+                              }
+                              else {
+                                  expectTypes(RuntimeType.iInteger, leftType, rightType,
+                                              "'>'");
+                                  pushBoolean(leftValue > rightValue);
+                              }
                           }
                           );
                 break;
@@ -302,11 +344,7 @@ public class AbsMach {
                                   System.out.print(rightValue == 1);
                                   break;
                               case iString:
-                                  StringBuilder sb = new StringBuilder();
-                                  while(code.getByte(rightValue) != 0) {
-                                      sb.append((char)code.getByte(rightValue++));
-                                  }
-                                  System.out.print(sb.toString());
+                                  System.out.print(getString(rightValue));
                                   break;
                               default:
                                   System.err.println("don't now how to print type " +
@@ -430,6 +468,14 @@ public class AbsMach {
         return stack.size();
     }
 
+    private String getString(Integer location) {
+        StringBuilder sb = new StringBuilder();
+        while(code.getByte(location) != 0) {
+            sb.append((char)code.getByte(location++));
+        }
+        return sb.toString();
+    }
+
     public static void main(String[] args) throws Exception {
         if(args.length != 1 && args.length != 2 && args.length != 3) {
             System.err.println("program needs to be called with a statement language " +
@@ -462,8 +508,15 @@ public class AbsMach {
             }
         }
 
-        AbsMach am = new AbsMach(args[fileArg]);
-        am.go(tracer, exec);
+        try {
+            AbsMach am = new AbsMach(args[fileArg]);
+            am.go(tracer, exec);
+        }
+        catch(RuntimeError err) {
+            System.err.println("The program doesn't mean what you think it means: " +
+                               err.getMessage());
+        }
+
     }
 
     // ------------------------------------------------------------------------------

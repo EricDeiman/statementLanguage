@@ -327,6 +327,11 @@ public class Compile extends StmntBaseVisitor<Integer> {
     @Override
     public Integer visitLogicId(StmntParser.LogicIdContext ctx) {
         String name = ctx.ID().getText();
+
+        LookupPair here = currentScope.get(name);
+        code.writeByte(ByteCodes.Copy).writeInteger(here.frames)
+            .writeInteger(here.offset * 2);
+
         return 0;
     }
 
@@ -373,9 +378,28 @@ public class Compile extends StmntBaseVisitor<Integer> {
 
     @Override
     public Integer visitStringRelExp(StmntParser.StringRelExpContext ctx) {
-        Integer ileft = visit(ctx.left);
-        Integer iright = visit(ctx.right);
+        visit(ctx.left);
+        visit(ctx.right);
         String op = ctx.op.getText();
+        switch(op) {
+        case "<":
+            code.writeByte(ByteCodes.Lt);
+            break;
+        case "<=":
+            code.writeByte(ByteCodes.Lte);
+            break;
+        case "?=":
+            code.writeByte(ByteCodes.Eq);
+            break;
+        case "!=":
+            code.writeByte(ByteCodes.Neq);
+            break;
+        case ">=":
+            code.writeByte(ByteCodes.Gte);
+            break;
+        case ">":
+            code.writeByte(ByteCodes.Gt);
+        }
         return 0;
     }
 

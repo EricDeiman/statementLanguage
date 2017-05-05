@@ -34,8 +34,8 @@ else {
      print "No, it doesn't." ;
 }
 
-print "How do you spell 3?" ;
 number <- 3 ;
+print "How do you spell" number "?" ;
 if( number ?= 1 ) {
     print "One" ;
 }

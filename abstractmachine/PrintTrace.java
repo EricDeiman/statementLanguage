@@ -23,6 +23,9 @@ public class PrintTrace extends EmptyTrace {
         Boolean hasOperand = false;
         Boolean hasOperandType = false;
 
+        String typeDStr = "";
+        String operandDStr = "";
+
         needsNewLine = false;
 
         switch(opCode) {
@@ -31,6 +34,14 @@ public class PrintTrace extends EmptyTrace {
             hasOperandType = true;
             type = code.getByte(position + 1);
             operand = code.getInteger(position + 2);
+            typeDStr = runtimeTypeCache[type].name();
+
+            if(type == RuntimeType.iString.ordinal()) {
+                operandDStr = String.format("0x%-6x", operand);
+            }
+            else {
+                operandDStr = String.format("%d", operand);
+            }
             break;
 
         case Move:
@@ -39,15 +50,23 @@ public class PrintTrace extends EmptyTrace {
             hasOperand = true;
             type = code.getInteger(position + 1);
             operand = code.getInteger(position + 5);
+            typeDStr = String.format("%d : ", type);
+            operandDStr = String.format("%-8d", operand);
             break;
 
         case Jmp:
         case JmpT:
         case JmpF:
+            hasOperand = true;
+            hasOperandType = false;
+            operand = code.getInteger(position + 1);
+            operandDStr = String.format("0x%-6x", operand);
+            break;
         case Locals:
             hasOperand = true;
             hasOperandType = false;
             operand = code.getInteger(position + 1);
+            operandDStr = String.format("%-8d", operand);
             break;
         case Print:
             needsNewLine = true;
@@ -56,8 +75,6 @@ public class PrintTrace extends EmptyTrace {
 
         String typeXStr = hasOperandType ? String.format("%02x", type) : "";
         String operandXStr = hasOperand ? String.format("%08x", operand) : "";
-        String typeDStr = hasOperandType ? runtimeTypeCache[type].name() : "";
-        String operandDStr = hasOperand ? String.format("%d", operand) : "";
         out.print(String.format("%04x:  %02x %2s %8s   %-6s %-8s %-8s",
                                 position,
                                 opCode.ordinal(),
