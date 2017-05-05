@@ -35,13 +35,13 @@ public class Scope {
     }
     
     public LookupPair get(String name) {
-        LookupPair rtn = new LookupPair();
+        LookupPair rtn;
         if(parent != null && parent.contains(name)) {
-            LookupPair temp = parent.get(name);
-            rtn.frames = temp.frames + 1;
-            rtn.offset = temp.offset;
+            rtn = parent.get(name);
+            rtn.frames++;
         }
         else if(store.contains(name)) {
+            rtn = new LookupPair();
             rtn.frames = 0;
             rtn.offset = store.indexOf(name);
         }
