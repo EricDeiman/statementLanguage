@@ -65,8 +65,6 @@ if(ImTrue)
   print "What is 'j'?" j;
 }
 
-print "What is 'j'?" j;
-
 print "Count down!" ;
 counter <- 5 ;
 while(counter >= 0) {
