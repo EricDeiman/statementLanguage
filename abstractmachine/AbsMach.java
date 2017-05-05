@@ -318,20 +318,36 @@ public class AbsMach {
                           );
                 break;
             case Move:
-                leftValue = code.readInteger();
+                leftValue = code.readInteger();  // frames
+                rightValue = code.readInteger(); // offset
                 exec.doIt((ignore) ->
                           {
-                              stack.setElementAt(stack.pop(), leftValue + 1); // value
-                              stack.setElementAt(stack.pop(), leftValue);     // type
+                              Integer tempFrameBase = frameBase;
+                              while(leftValue > 0){
+                                  tempFrameBase = stack.elementAt(tempFrameBase - 1);
+                                  leftValue--;
+                              }
+                              stack.setElementAt(stack.pop(),
+                                                 tempFrameBase + rightValue + 1); // value
+                              stack.setElementAt(stack.pop(),
+                                                 tempFrameBase + rightValue);     // type
                           }
                           );
                 break;
             case Copy:
-                leftValue = code.readInteger();
+                leftValue = code.readInteger();  // frames
+                rightValue = code.readInteger(); // offset
                 exec.doIt((ignore) ->
                           {
-                              stack.push(stack.elementAt(leftValue));      // type
-                              stack.push(stack.elementAt(leftValue + 1));  // value
+                              Integer tempFrameBase = frameBase;
+                              while(leftValue > 0){
+                                  tempFrameBase = stack.elementAt(tempFrameBase - 1);
+                                  leftValue--;
+                              }
+                              stack.push(stack.elementAt(tempFrameBase +
+                                                         rightValue));      // type
+                              stack.push(stack.elementAt(tempFrameBase +
+                                                         rightValue + 1));  // value
                           }
                           );
                 break;

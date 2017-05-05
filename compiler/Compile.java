@@ -10,15 +10,17 @@ import common.CodeBuffer;
 import common.RuntimeType;
 import common.Labeller;
 import common.BackPatch;
+import common.Scope;
+import common.LookupPair;
 
 import parser.*;
 
 public class Compile extends StmntBaseVisitor<Integer> {
-    public Compile(Vector<String> names) {
+    public Compile(ParseTreeProperty<Scope> scopes) {
         code = new CodeBuffer();
         where = new HashMap<String, Integer>();
         backPatches = new BackPatch();
-        mutables = names;
+        this.scopes = scopes;
         stringPool = new HashMap<String, String>();
         labelMaker = new Labeller();
     }
@@ -26,10 +28,11 @@ public class Compile extends StmntBaseVisitor<Integer> {
     @Override
     public Integer visitProg(StmntParser.ProgContext ctx) {
         Integer answer = 0;
+        currentScope = scopes.get(ctx);
 
-        code.writeByte(ByteCodes.Locals).writeInteger(mutables.size() * 2);
-        for(Integer i = 0; i < mutables.size(); i++) {
-            where.put(mutables.elementAt(i), (i * 2) + 1);
+        Vector<String> mutables = currentScope.getNames();
+        if(mutables.size() > 0)  {
+            code.writeByte(ByteCodes.Locals).writeInteger(mutables.size() * 2);
         }
 
         for(StmntParser.StatementContext sctx : ctx.statement()) {
@@ -68,9 +71,9 @@ public class Compile extends StmntBaseVisitor<Integer> {
         Integer value = visit(ctx.expression());
         String name = ctx.ID().getText();
 
-        code.writeByte(ByteCodes.Move);
-        backPatches.addBackPatch(name, code.getFinger());
-        code.writeInteger(0);
+        LookupPair here = currentScope.get(name);
+        code.writeByte(ByteCodes.Move).writeInteger(here.frames)
+            .writeInteger(here.offset * 2);
 
         return value;
     }
@@ -156,13 +159,19 @@ public class Compile extends StmntBaseVisitor<Integer> {
 
     @Override
     public Integer visitBlock(StmntParser.BlockContext ctx) {
-        //environment.beginScope();
+        currentScope = scopes.get(ctx);
         code.writeByte(ByteCodes.Enter);
+
+        Vector<String> mutables = currentScope.getNames();
+        if(mutables.size() > 0)  {
+            code.writeByte(ByteCodes.Locals).writeInteger(mutables.size() * 2);
+        }
+
         for(StmntParser.StatementContext sctx : ctx.statement()) {
             visit(sctx);
         }
         code.writeByte(ByteCodes.Exit);
-        //environment.endScope();
+        currentScope = currentScope.getParent();
         return 0;
     }
 
@@ -238,9 +247,9 @@ public class Compile extends StmntBaseVisitor<Integer> {
     public Integer visitId(StmntParser.IdContext ctx) {
         String name = ctx.ID().getText();
 
-        code.writeByte(ByteCodes.Copy);
-        backPatches.addBackPatch(name, code.getFinger());
-        code.writeInteger(0);
+        LookupPair here = currentScope.get(name);
+        code.writeByte(ByteCodes.Copy).writeInteger(here.frames)
+            .writeInteger(here.offset * 2);
 
         return 0;
     }
@@ -375,9 +384,10 @@ public class Compile extends StmntBaseVisitor<Integer> {
     }
 
     private CodeBuffer code;
-    private Vector<String> mutables;
+    private ParseTreeProperty<Scope> scopes;
     private HashMap<String, Integer> where;
     private BackPatch backPatches;
     private HashMap<String, String> stringPool;
     private Labeller labelMaker;
+    private Scope currentScope;
 }

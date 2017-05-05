@@ -1,13 +1,10 @@
+package common;
 
 import java.util.Vector;
 
 import common.RuntimeError;
 
 public class Scope {
-    public class LookupPair {
-        Integer frames;
-        Integer offset;
-    }
     
     public Scope(Scope parent) {
         this.parent = parent;
@@ -19,26 +16,32 @@ public class Scope {
     }
 
     public Boolean contains(String name) {
-        if(parent != null && !parent.contains(name)) {
-            return store.contains(name);
+        if(parent == null && !store.contains(name)) {
+            return false;   
+        } else if(store.contains(name)) {
+            return true;
         }
-        return true;
+        return parent.contains(name);
     }
 
     public void put(String name) {
-        if(parent != null && !parent.contains(name)) {
+        if(!contains(name)) {
             store.add(name);
         }
     }
 
+    public Vector<String> getNames() {
+        return store;
+    }
+    
     public LookupPair get(String name) {
-        LookupPair rtn;
+        LookupPair rtn = new LookupPair();
         if(parent != null && parent.contains(name)) {
-            rtn = parent.get(name);
-            rtn.frames++;
+            LookupPair temp = parent.get(name);
+            rtn.frames = temp.frames + 1;
+            rtn.offset = temp.offset;
         }
         else if(store.contains(name)) {
-            rtn = new LookupPair();
             rtn.frames = 0;
             rtn.offset = store.indexOf(name);
         }

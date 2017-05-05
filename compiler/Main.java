@@ -6,6 +6,7 @@ import java.io.InputStream;
 
 import parser.*;
 import common.RuntimeError;
+import common.Scope;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -32,11 +33,12 @@ public class Main {
 
         if(parser.getNumberOfSyntaxErrors() == 0){
             try {
-                MutableListener collectMutables = new MutableListener();
+                ParseTreeProperty<Scope> scopes = new ParseTreeProperty<Scope>();
+                MutableListener collectMutables = new MutableListener(scopes);
                 ParseTreeWalker walker = new ParseTreeWalker();
                 walker.walk(collectMutables, tree);
 
-                Compile compiler = new Compile(collectMutables.getNames());
+                Compile compiler = new Compile(scopes);
                 compiler.visit(tree);
                 compiler.writeCodeTo(outputFileName);
             }

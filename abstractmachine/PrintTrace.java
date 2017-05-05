@@ -32,8 +32,15 @@ public class PrintTrace extends EmptyTrace {
             type = code.getByte(position + 1);
             operand = code.getInteger(position + 2);
             break;
+
         case Move:
         case Copy:
+            hasOperandType = true;
+            hasOperand = true;
+            type = code.getInteger(position + 1);
+            operand = code.getInteger(position + 5);
+            break;
+
         case Jmp:
         case JmpT:
         case JmpF:

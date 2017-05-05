@@ -15,6 +15,7 @@ print "Count down:" ;
 while(t > -1) {
         print "T minus" t ;
         t <- t - 1;
+        d <- 42;
 }
 print "Lift off!" ;
 if(-5 ?= -5) {
