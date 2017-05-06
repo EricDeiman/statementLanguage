@@ -6,13 +6,17 @@
 
 grammar Stmnt;
 
-prog : statement* EOF
+prog : (statement | funcDecl)* EOF
      ;
+
+funcDecl : ID '(' ( ID (',' ID)* )? ')' block
+         ;
 
 statement : 'print' expression+ EOS #PrintStmnt
           | ID '<-' expression EOS #Assign
           | 'if' ifBlock ('else' 'if' ifBlock)* ('else' block)? #IfStmnt
           | 'while' '(' test=logicExp ')' body=block  #WhileStmnt
+          | expression EOS #ExpressionStmnt
           ;
 
 block : '{' statement*  '}'
@@ -24,6 +28,7 @@ ifBlock : '(' test=logicExp  ')' body=block
 expression : arithExp #ArithE
            | stringExp #StringE
            | logicExp #LogicE
+           | ID '(' (expression (',' expression)* )? ')' #FuncCall
            ;
 
 arithExp : '(' arithExp ')' #ArithGroup

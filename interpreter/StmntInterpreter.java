@@ -1,9 +1,10 @@
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
-import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
 import parser.*;
 import common.RuntimeError;
@@ -12,15 +13,29 @@ import common.RuntimeType;
 public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
 
     public Environment environment = new Environment();
+    public Map<String, FuncData> functionNameSpace = new HashMap<String, FuncData>();
 
     @Override
     public InterpValue visitProg(StmntParser.ProgContext ctx) {
         InterpValue answer = iIntergerZero;
+
+        for(StmntParser.FuncDeclContext fctx : ctx.funcDecl()) {
+            visit(fctx);
+        }
+
         for(StmntParser.StatementContext sctx : ctx.statement()) {
             answer = visit(sctx);
         }
 
         return answer;
+    }
+
+    @Override
+    public InterpValue visitFuncDecl(StmntParser.FuncDeclContext ctx) {
+        FuncData func = new FuncData(ctx.ID(), ctx.block());
+        functionNameSpace.put(func.getName(), func);
+
+        return iStringNull;
     }
 
     @Override
@@ -94,6 +109,11 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
     }
 
     @Override
+    public InterpValue visitExpressionStmnt(StmntParser.ExpressionStmntContext ctx) {
+        return visit(ctx.expression());
+    }
+
+    @Override
     public InterpValue visitBlock(StmntParser.BlockContext ctx) {
         InterpValue answer = iIntergerZero;
         environment.beginScope();
@@ -117,6 +137,46 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
     @Override
     public InterpValue visitLogicE(StmntParser.LogicEContext ctx) {
         return visit(ctx.logicExp());
+    }
+
+    @Override
+    public InterpValue visitFuncCall(StmntParser.FuncCallContext ctx) {
+        String name = ctx.ID().getText();
+        if(!functionNameSpace.containsKey(name)) {
+            throw new RuntimeError("cannot find function named " + name);
+        }
+
+        FuncData fun = functionNameSpace.get(name);
+
+        List<InterpValue> arguments = new Vector<InterpValue>();
+        for(StmntParser.ExpressionContext exp : ctx.expression()) {
+            arguments.add(visit(exp));
+        }
+
+        List<String> params = fun.getParameters();
+
+        if(arguments.size() != params.size()) {
+            Integer line = ctx.getStart().getLine();
+            Integer pos = ctx.getStart().getCharPositionInLine();
+            throw new RuntimeError("attempt to call " + name + " with wrong parameter" +
+                                   " count at " + line + ":" + pos +
+                                   ".  Expected " + params.size() + " got " +
+                                   arguments.size());
+        }
+
+        InterpValue answer = iStringNull;
+
+        environment.beginScope();
+
+        for(int i = 0; i < params.size(); i++) {
+            environment.putShadow(params.get(i), arguments.get(i));
+        }
+
+        answer = visit(fun.getBody());
+
+        environment.endScope();
+
+        return answer;
     }
 
     @Override

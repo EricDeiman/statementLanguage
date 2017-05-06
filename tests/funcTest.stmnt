@@ -1,0 +1,18 @@
+hello() {
+        print "Hello function world!";
+}
+
+print "Hello statement world!";
+
+hello();
+
+name <- "Everett";
+print "Name is" name;
+
+helloName(name) {
+                print "Hello" name;
+}
+
+helloName("Eric");
+
+print "Name is" name;

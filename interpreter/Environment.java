@@ -35,6 +35,14 @@ public class Environment {
         return store.get(store.size() - 1).put(key, value);
     }
 
+    /**
+     * Put key into the most recent scope even if it hides the same key in a previous
+     * scope.
+     */
+    public InterpValue putShadow(String key, InterpValue value) {
+        return store.get(store.size() - 1).put(key, value);
+    }
+
     public InterpValue get(String key) {
         for(int i = store.size() - 1; 0 < i; i--) {
             if(store.get(i).containsKey(key)) {
