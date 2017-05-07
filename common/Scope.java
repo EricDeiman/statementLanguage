@@ -30,20 +30,25 @@ public class Scope {
         }
     }
 
+    public void putShadow(String name) {
+        if(!store.contains(name)) {
+            store.add(name);
+        }
+    }
+
     public Vector<String> getNames() {
         return store;
     }
     
     public LookupPair get(String name) {
         LookupPair rtn;
-        if(parent != null && parent.contains(name)) {
-            rtn = parent.get(name);
-            rtn.frames++;
-        }
-        else if(store.contains(name)) {
+        if(store.contains(name)) {
             rtn = new LookupPair();
             rtn.frames = 0;
             rtn.offset = store.indexOf(name);
+        } else if(parent != null && parent.contains(name)) {
+            rtn = parent.get(name);
+            rtn.frames++;
         }
         else {
             throw new RuntimeError("Cannot find " + name + " in scopes");

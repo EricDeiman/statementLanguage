@@ -57,6 +57,7 @@ public class PrintTrace extends EmptyTrace {
         case Jmp:
         case JmpT:
         case JmpF:
+        case Call:
             hasOperand = true;
             hasOperandType = false;
             operand = code.getInteger(position + 1);

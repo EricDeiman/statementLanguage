@@ -3,6 +3,7 @@ import org.antlr.v4.runtime.tree.*;
 
 import parser.*;
 
+import java.util.List;
 import java.util.Vector;
 
 import common.Scope;
@@ -16,6 +17,21 @@ public class MutableListener extends StmntBaseListener {
     public void enterProg(StmntParser.ProgContext ctx) {
         currentScope = new Scope(null);
         scopes.put(ctx, currentScope);
+    }
+
+    @Override
+    public void enterFuncDecl(StmntParser.FuncDeclContext ctx) {
+        currentScope = new Scope(currentScope);
+        scopes.put(ctx, currentScope);
+        List<TerminalNode> names = ctx.ID();
+        for(int i = 1; i < names.size(); i++) {
+            currentScope.put(names.get(i).getText());
+        }
+    }
+
+    @Override
+    public void exitFuncDecl(StmntParser.FuncDeclContext ctx) {
+        currentScope = currentScope.getParent();
     }
 
     @Override

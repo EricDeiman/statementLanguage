@@ -16,6 +16,25 @@ public class AbsMach {
         stack = new Stack<Integer>();
         runtimeTypeCache = RuntimeType.values();
         byteCodesCache = ByteCodes.values();
+
+        String signature = "stmnt";
+        for(int i = 0; i < signature.length(); i++) {
+            if(code.getByte(i) != signature.charAt(i)) {
+                throw new RuntimeError("invalid signature in " + fileName);
+            }
+        }
+
+        Integer majorVer = code.getByte(signature.length());
+        if( majorVer != 0) {
+            throw new RuntimeError("cannot run major version " + majorVer );
+        }
+
+        Integer minorVer = code.getByte(signature.length() + 1);
+        if( minorVer != 1) {
+            throw new RuntimeError("cannot run minor version " + minorVer );
+        }
+
+        code.setFinger(code.getInteger(signature.length() + 2));
     }
 
     public AbsMach(InputStream in) {
@@ -24,6 +43,25 @@ public class AbsMach {
         stack = new Stack<Integer>();
         runtimeTypeCache = RuntimeType.values();
         byteCodesCache = ByteCodes.values();
+
+        String signature = "stmnt";
+        for(int i = 0; i < signature.length(); i++) {
+            if(code.getByte(i) != signature.charAt(i)) {
+                throw new RuntimeError("invalid signature in stream");
+            }
+        }
+
+        Integer majorVer = code.getByte(signature.length());
+        if( majorVer != 0) {
+            throw new RuntimeError("cannot run major version " + majorVer );
+        }
+
+        Integer minorVer = code.getByte(signature.length() + 1);
+        if( minorVer != 0) {
+            throw new RuntimeError("cannot run minor version " + minorVer );
+        }
+
+        code.setFinger(code.getInteger(signature.length() + 2));
     }
 
     public Integer go(Trace trace, Executor exec) {
@@ -459,6 +497,25 @@ public class AbsMach {
                           }
                           );
                 break;
+
+            case Call:
+                leftValue = code.readInteger();
+                exec.doIt((ignore) ->
+                          {
+                              code.setFinger(leftValue);  
+                          }
+                          );
+                break;
+
+            case Return:
+                exec.doIt((ignore) ->
+                          {
+                              leftValue = stack.elementAt(frameBase - 2);
+                              code.setFinger(leftValue);
+                          }
+                          );
+                break;
+
             default:
                 break;
             }
@@ -558,4 +615,5 @@ public class AbsMach {
     private RuntimeType[] runtimeTypeCache;
     private ByteCodes[] byteCodesCache;
     private Integer frameBase;
+    private Integer startHere;
 }

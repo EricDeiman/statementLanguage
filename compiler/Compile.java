@@ -1,17 +1,19 @@
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
-import java.util.List;
-import java.util.Vector;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
+import common.BackPatch;
 import common.ByteCodes;
 import common.CodeBuffer;
-import common.RuntimeType;
 import common.Labeller;
-import common.BackPatch;
-import common.Scope;
 import common.LookupPair;
+import common.RuntimeError;
+import common.RuntimeType;
+import common.Scope;
 
 import parser.*;
 
@@ -23,12 +25,29 @@ public class Compile extends StmntBaseVisitor<Integer> {
         this.scopes = scopes;
         stringPool = new HashMap<String, String>();
         labelMaker = new Labeller();
+        functionNameSpace = new HashMap<String, FuncMeta>();
     }
 
     @Override
     public Integer visitProg(StmntParser.ProgContext ctx) {
         Integer answer = 0;
         currentScope = scopes.get(ctx);
+
+        // signature
+        code.writeByte('s').writeByte('t').writeByte('m').writeByte('n').writeByte('t');
+
+        // major version minor version
+        code.writeByte(0).writeByte(1);
+
+        String startHere = labelMaker.make("main");
+        backPatches.addBackPatch(startHere, code.getFinger());
+        code.writeInteger(0);
+
+        for(StmntParser.FuncDeclContext fctx : ctx.funcDecl()) {
+            visit(fctx);
+        }
+
+        where.put(startHere, code.getFinger());
 
         Vector<String> mutables = currentScope.getNames();
         if(mutables.size() > 0)  {
@@ -50,6 +69,25 @@ public class Compile extends StmntBaseVisitor<Integer> {
         backPatches.doBackPatches(where, code);
 
         return answer;
+    }
+
+    @Override
+    public Integer visitFuncDecl(StmntParser.FuncDeclContext ctx) {
+        FuncMeta fun = new FuncMeta(labelMaker, ctx.ID());
+        functionNameSpace.put(fun.getName(), fun);
+        where.put(fun.getLabel(), code.getFinger());
+
+        currentScope = scopes.get(ctx);
+
+        for(String name : fun.getParameters()) {
+            currentScope.putShadow(name);
+        }
+
+        visit(ctx.block());
+        currentScope = currentScope.getParent();
+        code.writeByte(ByteCodes.Return);
+
+        return 0;
     }
 
     @Override
@@ -188,6 +226,51 @@ public class Compile extends StmntBaseVisitor<Integer> {
     @Override
     public Integer visitLogicE(StmntParser.LogicEContext ctx) {
         return visit(ctx.logicExp());
+    }
+
+    @Override
+    public Integer visitFuncCall(StmntParser.FuncCallContext ctx) {
+        String name = ctx.ID().getText();
+        if(!functionNameSpace.containsKey(name)) {
+            throw new RuntimeError("cannot find function named " + name);
+        }
+
+        FuncMeta fun = functionNameSpace.get(name);
+
+        List<StmntParser.ExpressionContext> args = ctx.expression();
+
+        Integer parametersSize = fun.getParameters().size();
+        if(args.size() != parametersSize) {
+            Integer line = ctx.getStart().getLine();
+            Integer pos = ctx.getStart().getCharPositionInLine();
+            throw new RuntimeError("attempt to call " + name + " with wrong parameter" +
+                                   " count at " + line + ":" + pos +
+                                   ".  Expected " + parametersSize + " got " +
+                                   args.size());
+        }
+
+        String functionReturn = labelMaker.make();
+
+        // push return instruction pointer
+        code.writeByte(ByteCodes.Push).writeByte(0);
+        backPatches.addBackPatch(functionReturn, code.getFinger());
+        code.writeInteger(0);
+
+        code.writeByte(ByteCodes.Enter);
+
+        for(StmntParser.ExpressionContext arg : args) {
+            visit(arg);
+        }
+
+        code.writeByte(ByteCodes.Call);
+        backPatches.addBackPatch(fun.getLabel(), code.getFinger());
+        code.writeInteger(0);
+
+        where.put(functionReturn, code.getFinger());
+        code.writeByte(ByteCodes.Exit);
+        code.writeByte(ByteCodes.Pop); // get rid of return instruction pointer
+
+        return 0;
     }
 
     @Override
@@ -414,4 +497,5 @@ public class Compile extends StmntBaseVisitor<Integer> {
     private HashMap<String, String> stringPool;
     private Labeller labelMaker;
     private Scope currentScope;
+    private Map<String, FuncMeta> functionNameSpace;
 }

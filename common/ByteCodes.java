@@ -29,4 +29,6 @@ public enum ByteCodes {
     Enter,  // 0x19   // enter a new scope
     Exit,   // 0x1a   // exiti a scope
     Locals, // 0x1b   // reserve parameter number of stack slots
+    Call,   // 0x1c   // call a function at the address in the parameter
+    Return, // 0x1d   // return from a function call
 }
