@@ -17,3 +17,12 @@ hello(name) {
 hello("Eric");
 
 print "Name is" name;
+
+hello(name1, name2) {
+  print "Hello" name1 "and" name2;
+  print "Hello" name2 "and" name1;
+}
+
+kid1 <- "Evan";
+kid2 <- "Neil";
+hello(kid1, kid2);

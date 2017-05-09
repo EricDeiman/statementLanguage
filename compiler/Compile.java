@@ -264,10 +264,13 @@ public class Compile extends StmntBaseVisitor<Integer> {
 
         code.writeByte(ByteCodes.Enter);
 
+        currentScope = new Scope(currentScope);
+
         for(StmntParser.ExpressionContext arg : args) {
             visit(arg);
         }
 
+        currentScope = currentScope.getParent();
         code.writeByte(ByteCodes.Call);
         backPatches.addBackPatch(fun.getLabel(), code.getFinger());
         code.writeInteger(0);

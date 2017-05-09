@@ -436,8 +436,14 @@ public class AbsMach {
                 fileArg = 2;
                 break;
             case "-disasm": {
-                PrintStream out = new PrintStream(new File(args[1]));
-                DisAsm disAsm = new DisAsm(args[2], out);
+                DisAsm disAsm = null;
+                if(args.length == 2) {
+                    disAsm = new DisAsm(args[1], System.out);
+                }
+                else if(args.length == 3) {
+                    PrintStream out = new PrintStream(new File(args[1]));
+                    disAsm = new DisAsm(args[2], out);
+                }
                 disAsm.go();
                 return;
             }
