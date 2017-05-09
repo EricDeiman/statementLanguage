@@ -9,10 +9,11 @@ hello();
 name <- "Everett";
 print "Name is" name;
 
-helloName(name) {
-                print "Hello" name;
+hello(name) {
+  wife <- "Soma";
+  print "Hello" name "and" wife;
 }
 
-helloName("Eric");
+hello("Eric");
 
 print "Name is" name;

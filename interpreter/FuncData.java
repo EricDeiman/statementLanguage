@@ -17,10 +17,16 @@ public class FuncData {
         for(TerminalNode id : names) {
             parameters.add(id.getText());
         }
+
+        internalName = String.format("%s\\%d", name, parameters.size());
     }
 
     public String getName() {
         return name;
+    }
+
+    public String getInternalName() {
+        return internalName;
     }
 
     public List<String> getParameters() {
@@ -34,4 +40,5 @@ public class FuncData {
     private String name;
     private List<String> parameters;
     private BlockContext body;
+    private String internalName;
 }

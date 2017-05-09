@@ -74,7 +74,12 @@ public class Compile extends StmntBaseVisitor<Integer> {
     @Override
     public Integer visitFuncDecl(StmntParser.FuncDeclContext ctx) {
         FuncMeta fun = new FuncMeta(labelMaker, ctx.ID());
-        functionNameSpace.put(fun.getName(), fun);
+        if(functionNameSpace.containsKey(fun.getInternalName())) {
+            throw new RuntimeError("attempt to redefine function " + fun.getName() +
+                                   " near " + ctx.getStart().getLine() + ":" +
+                                   ctx.getStart().getCharPositionInLine());
+        }
+        functionNameSpace.put(fun.getInternalName(), fun);
         where.put(fun.getLabel(), code.getFinger());
 
         currentScope = scopes.get(ctx);
@@ -231,13 +236,14 @@ public class Compile extends StmntBaseVisitor<Integer> {
     @Override
     public Integer visitFuncCall(StmntParser.FuncCallContext ctx) {
         String name = ctx.ID().getText();
-        if(!functionNameSpace.containsKey(name)) {
+        List<StmntParser.ExpressionContext> args = ctx.expression();
+        String internalName = String.format("%s\\%d", name, args.size());
+
+        if(!functionNameSpace.containsKey(internalName)) {
             throw new RuntimeError("cannot find function named " + name);
         }
 
-        FuncMeta fun = functionNameSpace.get(name);
-
-        List<StmntParser.ExpressionContext> args = ctx.expression();
+        FuncMeta fun = functionNameSpace.get(internalName);
 
         Integer parametersSize = fun.getParameters().size();
         if(args.size() != parametersSize) {
@@ -249,10 +255,10 @@ public class Compile extends StmntBaseVisitor<Integer> {
                                    args.size());
         }
 
-        String functionReturn = labelMaker.make();
+        String functionReturn = labelMaker.make("functionReturn");
 
         // push return instruction pointer
-        code.writeByte(ByteCodes.Push).writeByte(0);
+        code.writeByte(ByteCodes.Push).writeByte(RuntimeType.iInteger);
         backPatches.addBackPatch(functionReturn, code.getFinger());
         code.writeInteger(0);
 

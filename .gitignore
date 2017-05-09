@@ -5,3 +5,4 @@
 *.log
 *.stmnt.c
 *.stmnt.i
+*.asm

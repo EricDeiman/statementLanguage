@@ -16,10 +16,16 @@ public class FuncMeta {
         for(TerminalNode param : names) {
             parameters.add(param.getText());
         }
+
+        internalName = String.format("%s\\%d", name, parameters.size());
     }
 
     public String getName() {
         return name;
+    }
+
+    public String getInternalName() {
+        return internalName;
     }
 
     public String getLabel() {
@@ -33,4 +39,5 @@ public class FuncMeta {
     private String name;
     private String label;
     private List<String> parameters;
+    private String internalName;
 }

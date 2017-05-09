@@ -33,7 +33,12 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
     @Override
     public InterpValue visitFuncDecl(StmntParser.FuncDeclContext ctx) {
         FuncData func = new FuncData(ctx.ID(), ctx.block());
-        functionNameSpace.put(func.getName(), func);
+        if(functionNameSpace.containsKey(func.getInternalName())) {
+            throw new RuntimeError("attempt to redefine function " + func.getName() +
+                                   " near " + ctx.getStart().getLine() + ":" +
+                                   ctx.getStart().getCharPositionInLine());
+        }
+        functionNameSpace.put(func.getInternalName(), func);
 
         return iStringNull;
     }
@@ -142,16 +147,18 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
     @Override
     public InterpValue visitFuncCall(StmntParser.FuncCallContext ctx) {
         String name = ctx.ID().getText();
-        if(!functionNameSpace.containsKey(name)) {
-            throw new RuntimeError("cannot find function named " + name);
-        }
-
-        FuncData fun = functionNameSpace.get(name);
-
         List<InterpValue> arguments = new Vector<InterpValue>();
         for(StmntParser.ExpressionContext exp : ctx.expression()) {
             arguments.add(visit(exp));
         }
+
+        String internalName = String.format("%s\\%d", name, arguments.size());
+        if(!functionNameSpace.containsKey(internalName)) {
+            throw new RuntimeError("cannot find function named " + name);
+        }
+
+        FuncData fun = functionNameSpace.get(internalName);
+
 
         List<String> params = fun.getParameters();
 

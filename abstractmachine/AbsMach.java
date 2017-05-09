@@ -64,13 +64,9 @@ public class AbsMach {
         code.setFinger(code.getInteger(signature.length() + 2));
     }
 
-    public Integer go(Trace trace, Executor exec) {
-        exec.doIt((ignore) ->
-                  {
-                      stack.push(1);
-                      frameBase = 1;
-                  }
-                  );
+    public Integer go(Trace trace) {
+        stack.push(1);
+        frameBase = 1;
 
         trace.preProgram(code, stack, frameBase);
 
@@ -83,437 +79,323 @@ public class AbsMach {
             case Push:
                 leftType = runtimeTypeCache[code.readByte()];
                 leftValue = code.readInteger();
-                exec.doIt((ignore) ->
-                          {
-                              stack.push(leftType.ordinal());
-                              stack.push(leftValue);
-                          }
-                          );
+                stack.push(leftType.ordinal());
+                stack.push(leftValue);
                 break;
             case Pop:
-                exec.doIt((ignore) ->
-                          {
-                              stack.pop();  // pop the value
-                              stack.pop();  // pop the type
-                          }
-                          );
+                stack.pop();  // pop the value
+                stack.pop();  // pop the type
                 break;
             case Add:
-                exec.doIt((ignore) ->
-                          {
-                              rightValue = stack.pop();
-                              rightType = runtimeTypeCache[stack.pop()];
-                              leftValue = stack.pop();
-                              leftType = runtimeTypeCache[stack.pop()];
+                rightValue = stack.pop();
+                rightType = runtimeTypeCache[stack.pop()];
+                leftValue = stack.pop();
+                leftType = runtimeTypeCache[stack.pop()];
 
-                              expectTypes(RuntimeType.iInteger, leftType, rightType,
-                                          "add");
+                expectTypes(RuntimeType.iInteger, leftType, rightType,
+                            "add");
 
-                              stack.push(RuntimeType.iInteger.ordinal());
-                              stack.push(leftValue + rightValue);
-                          }
-                          );
+                stack.push(RuntimeType.iInteger.ordinal());
+                stack.push(leftValue + rightValue);
                 break;
             case Sub:
-                exec.doIt((ignore) ->
-                          {
-                              rightValue = stack.pop();
-                              rightType = runtimeTypeCache[stack.pop()];
-                              leftValue = stack.pop();
-                              leftType = runtimeTypeCache[stack.pop()];
+                rightValue = stack.pop();
+                rightType = runtimeTypeCache[stack.pop()];
+                leftValue = stack.pop();
+                leftType = runtimeTypeCache[stack.pop()];
 
-                              expectTypes(RuntimeType.iInteger, leftType, rightType,
-                                          "subtract");
+                expectTypes(RuntimeType.iInteger, leftType, rightType,
+                            "subtract");
 
-                              stack.push(RuntimeType.iInteger.ordinal());
-                              stack.push(leftValue - rightValue);
-                          }
-                          );
+                stack.push(RuntimeType.iInteger.ordinal());
+                stack.push(leftValue - rightValue);
                 break;
             case Mul:
-                exec.doIt((ignore) ->
-                          {
-                              rightValue = stack.pop();
-                              rightType = runtimeTypeCache[stack.pop()];
-                              leftValue = stack.pop();
-                              leftType = runtimeTypeCache[stack.pop()];
+                rightValue = stack.pop();
+                rightType = runtimeTypeCache[stack.pop()];
+                leftValue = stack.pop();
+                leftType = runtimeTypeCache[stack.pop()];
 
-                              expectTypes(RuntimeType.iInteger, leftType, rightType,
-                                          "multiply");
+                expectTypes(RuntimeType.iInteger, leftType, rightType,
+                            "multiply");
 
-                              stack.push(RuntimeType.iInteger.ordinal());
-                              stack.push(leftValue * rightValue);
-                          }
-                          );
+                stack.push(RuntimeType.iInteger.ordinal());
+                stack.push(leftValue * rightValue);
                 break;
             case Div:
-                exec.doIt((ignore) ->
-                          {
-                              rightValue = stack.pop();
-                              rightType = runtimeTypeCache[stack.pop()];
-                              leftValue = stack.pop();
-                              leftType = runtimeTypeCache[stack.pop()];
+                rightValue = stack.pop();
+                rightType = runtimeTypeCache[stack.pop()];
+                leftValue = stack.pop();
+                leftType = runtimeTypeCache[stack.pop()];
 
-                              expectTypes(RuntimeType.iInteger, leftType, rightType,
-                                          "'div'");
+                expectTypes(RuntimeType.iInteger, leftType, rightType,
+                            "'div'");
 
-                              stack.push(RuntimeType.iInteger.ordinal());
-                              stack.push(leftValue / rightValue);
-                          }
-                          );
+                stack.push(RuntimeType.iInteger.ordinal());
+                stack.push(leftValue / rightValue);
                 break;
             case Rem:
-                exec.doIt((ignore) ->
-                          {
-                              rightValue = stack.pop();
-                              rightType = runtimeTypeCache[stack.pop()];
-                              leftValue = stack.pop();
-                              leftType = runtimeTypeCache[stack.pop()];
+                rightValue = stack.pop();
+                rightType = runtimeTypeCache[stack.pop()];
+                leftValue = stack.pop();
+                leftType = runtimeTypeCache[stack.pop()];
 
-                              expectTypes(RuntimeType.iInteger, leftType, rightType,
-                                          "'rem'");
+                expectTypes(RuntimeType.iInteger, leftType, rightType,
+                            "'rem'");
 
-                              stack.push(RuntimeType.iInteger.ordinal());
-                              stack.push(leftValue % rightValue);
-                          }
-                          );
+                stack.push(RuntimeType.iInteger.ordinal());
+                stack.push(leftValue % rightValue);
                 break;
             case Pow:
-                exec.doIt((ignore) ->
-                          {
-                              rightValue = stack.pop();
-                              rightType = runtimeTypeCache[stack.pop()];
-                              leftValue = stack.pop();
-                              leftType = runtimeTypeCache[stack.pop()];
+                rightValue = stack.pop();
+                rightType = runtimeTypeCache[stack.pop()];
+                leftValue = stack.pop();
+                leftType = runtimeTypeCache[stack.pop()];
 
-                              expectTypes(RuntimeType.iInteger, leftType, rightType,
-                                          "'pow'");
+                expectTypes(RuntimeType.iInteger, leftType, rightType,
+                            "'pow'");
 
-                              Double danswer = Math.pow(leftValue, rightValue);
-                              stack.push(RuntimeType.iInteger.ordinal());
-                              stack.push(danswer.intValue());
-                          }
-                          );
+                Double danswer = Math.pow(leftValue, rightValue);
+                stack.push(RuntimeType.iInteger.ordinal());
+                stack.push(danswer.intValue());
                 break;
             case Lt:
-                exec.doIt((ignore) ->
-                          {
-                              rightValue = stack.pop();
-                              rightType = runtimeTypeCache[stack.pop()];
-                              leftValue = stack.pop();
-                              leftType = runtimeTypeCache[stack.pop()];
+                rightValue = stack.pop();
+                rightType = runtimeTypeCache[stack.pop()];
+                leftValue = stack.pop();
+                leftType = runtimeTypeCache[stack.pop()];
 
-                              if(leftType == RuntimeType.iString &&
-                                 rightType == RuntimeType.iString) {
-                                  String leftString = getString(leftValue);
-                                  String rightString = getString(rightValue);
-                                  pushBoolean(leftString.compareTo(rightString) < 0);
-                              }
-                              else {
-                                  expectTypes(RuntimeType.iInteger, leftType, rightType,
-                                              "'<'");
-                                  pushBoolean(leftValue < rightValue);
-                              }
-                          }
-                          );
+                if(leftType == RuntimeType.iString &&
+                   rightType == RuntimeType.iString) {
+                    String leftString = getString(leftValue);
+                    String rightString = getString(rightValue);
+                    pushBoolean(leftString.compareTo(rightString) < 0);
+                }
+                else {
+                    expectTypes(RuntimeType.iInteger, leftType, rightType,
+                                "'<'");
+                    pushBoolean(leftValue < rightValue);
+                }
                 break;
             case Lte:
-                exec.doIt((ignore) ->
-                          {
-                              rightValue = stack.pop();
-                              rightType = runtimeTypeCache[stack.pop()];
-                              leftValue = stack.pop();
-                              leftType = runtimeTypeCache[stack.pop()];
+                rightValue = stack.pop();
+                rightType = runtimeTypeCache[stack.pop()];
+                leftValue = stack.pop();
+                leftType = runtimeTypeCache[stack.pop()];
 
-                              if(leftType == RuntimeType.iString &&
-                                 rightType == RuntimeType.iString) {
-                                  String leftString = getString(leftValue);
-                                  String rightString = getString(rightValue);
-                                  pushBoolean(leftString.compareTo(rightString) <= 0);
-                              }
-                              else {
-                                  expectTypes(RuntimeType.iInteger, leftType, rightType,
-                                              "'<='");
-                                  pushBoolean(leftValue <= rightValue);
-                              }
-                          }
-                          );
+                if(leftType == RuntimeType.iString &&
+                   rightType == RuntimeType.iString) {
+                    String leftString = getString(leftValue);
+                    String rightString = getString(rightValue);
+                    pushBoolean(leftString.compareTo(rightString) <= 0);
+                }
+                else {
+                    expectTypes(RuntimeType.iInteger, leftType, rightType,
+                                "'<='");
+                    pushBoolean(leftValue <= rightValue);
+                }
                 break;
             case Eq:
-                exec.doIt((ignore) ->
-                          {
-                              rightValue = stack.pop();
-                              rightType = runtimeTypeCache[stack.pop()];
-                              leftValue = stack.pop();
-                              leftType = runtimeTypeCache[stack.pop()];
+                rightValue = stack.pop();
+                rightType = runtimeTypeCache[stack.pop()];
+                leftValue = stack.pop();
+                leftType = runtimeTypeCache[stack.pop()];
 
-                              if(leftType == RuntimeType.iString &&
-                                 rightType == RuntimeType.iString) {
-                                  String leftString = getString(leftValue);
-                                  String rightString = getString(rightValue);
-                                  pushBoolean(leftString.compareTo(rightString) == 0);
-                              }
-                              else {
-                                  expectTypes(RuntimeType.iInteger, leftType, rightType,
-                                              "'?='");
-                                  pushBoolean(leftValue == rightValue);
-                              }
-                          }
-                          );
+                if(leftType == RuntimeType.iString &&
+                   rightType == RuntimeType.iString) {
+                    String leftString = getString(leftValue);
+                    String rightString = getString(rightValue);
+                    pushBoolean(leftString.compareTo(rightString) == 0);
+                }
+                else {
+                    expectTypes(RuntimeType.iInteger, leftType, rightType,
+                                "'?='");
+                    pushBoolean(leftValue == rightValue);
+                }
                 break;
             case Neq:
-                exec.doIt((ignore) ->
-                          {
-                              rightValue = stack.pop();
-                              rightType = runtimeTypeCache[stack.pop()];
-                              leftValue = stack.pop();
-                              leftType = runtimeTypeCache[stack.pop()];
+                rightValue = stack.pop();
+                rightType = runtimeTypeCache[stack.pop()];
+                leftValue = stack.pop();
+                leftType = runtimeTypeCache[stack.pop()];
 
-                              if(leftType == RuntimeType.iString &&
-                                 rightType == RuntimeType.iString) {
-                                  String leftString = getString(leftValue);
-                                  String rightString = getString(rightValue);
-                                  pushBoolean(leftString.compareTo(rightString) != 0);
-                              }
-                              else {
-                                  expectTypes(RuntimeType.iInteger, leftType, rightType,
-                                              "'!='");
-                                  pushBoolean(leftValue != rightValue);
-                              }
-                          }
-                          );
+                if(leftType == RuntimeType.iString &&
+                   rightType == RuntimeType.iString) {
+                    String leftString = getString(leftValue);
+                    String rightString = getString(rightValue);
+                    pushBoolean(leftString.compareTo(rightString) != 0);
+                }
+                else {
+                    expectTypes(RuntimeType.iInteger, leftType, rightType,
+                                "'!='");
+                    pushBoolean(leftValue != rightValue);
+                }
                 break;
             case Gte:
-                exec.doIt((ignore) ->
-                          {
-                              rightValue = stack.pop();
-                              rightType = runtimeTypeCache[stack.pop()];
-                              leftValue = stack.pop();
-                              leftType = runtimeTypeCache[stack.pop()];
+                rightValue = stack.pop();
+                rightType = runtimeTypeCache[stack.pop()];
+                leftValue = stack.pop();
+                leftType = runtimeTypeCache[stack.pop()];
 
-                              if(leftType == RuntimeType.iString &&
-                                 rightType == RuntimeType.iString) {
-                                  String leftString = getString(leftValue);
-                                  String rightString = getString(rightValue);
-                                  pushBoolean(leftString.compareTo(rightString) >= 0);
-                              }
-                              else {
-                                  expectTypes(RuntimeType.iInteger, leftType, rightType,
-                                              "'>='");
-                                  pushBoolean(leftValue >= rightValue);
-                              }
-                          }
-                          );
+                if(leftType == RuntimeType.iString &&
+                   rightType == RuntimeType.iString) {
+                    String leftString = getString(leftValue);
+                    String rightString = getString(rightValue);
+                    pushBoolean(leftString.compareTo(rightString) >= 0);
+                }
+                else {
+                    expectTypes(RuntimeType.iInteger, leftType, rightType,
+                                "'>='");
+                    pushBoolean(leftValue >= rightValue);
+                }
                 break;
             case Gt:
-                exec.doIt((ignore) ->
-                          {
-                              rightValue = stack.pop();
-                              rightType = runtimeTypeCache[stack.pop()];
-                              leftValue = stack.pop();
-                              leftType = runtimeTypeCache[stack.pop()];
+                rightValue = stack.pop();
+                rightType = runtimeTypeCache[stack.pop()];
+                leftValue = stack.pop();
+                leftType = runtimeTypeCache[stack.pop()];
 
-                              if(leftType == RuntimeType.iString &&
-                                 rightType == RuntimeType.iString) {
-                                  String leftString = getString(leftValue);
-                                  String rightString = getString(rightValue);
-                                  pushBoolean(leftString.compareTo(rightString) > 0);
-                              }
-                              else {
-                                  expectTypes(RuntimeType.iInteger, leftType, rightType,
-                                              "'>'");
-                                  pushBoolean(leftValue > rightValue);
-                              }
-                          }
-                          );
+                if(leftType == RuntimeType.iString &&
+                   rightType == RuntimeType.iString) {
+                    String leftString = getString(leftValue);
+                    String rightString = getString(rightValue);
+                    pushBoolean(leftString.compareTo(rightString) > 0);
+                }
+                else {
+                    expectTypes(RuntimeType.iInteger, leftType, rightType,
+                                "'>'");
+                    pushBoolean(leftValue > rightValue);
+                }
                 break;
             case And:
-                exec.doIt((ignore) ->
-                          {
-                              rightValue = stack.pop();
-                              rightType = runtimeTypeCache[stack.pop()];
-                              leftValue = stack.pop();
-                              leftType = runtimeTypeCache[stack.pop()];
+                rightValue = stack.pop();
+                rightType = runtimeTypeCache[stack.pop()];
+                leftValue = stack.pop();
+                leftType = runtimeTypeCache[stack.pop()];
 
-                              expectTypes(RuntimeType.iBoolean, leftType, rightType,
-                                          "'and'");
+                expectTypes(RuntimeType.iBoolean, leftType, rightType,
+                            "'and'");
 
-                              pushBoolean(leftValue == 1 && rightValue == 1);
-                          }
-                          );
+                pushBoolean(leftValue == 1 && rightValue == 1);
                 break;
             case Or:
-                exec.doIt((ignore) ->
-                          {
-                              rightValue = stack.pop();
-                              rightType = runtimeTypeCache[stack.pop()];
-                              leftValue = stack.pop();
-                              leftType = runtimeTypeCache[stack.pop()];
+                rightValue = stack.pop();
+                rightType = runtimeTypeCache[stack.pop()];
+                leftValue = stack.pop();
+                leftType = runtimeTypeCache[stack.pop()];
 
-                              expectTypes(RuntimeType.iBoolean, leftType, rightType,
-                                          "'or'");
+                expectTypes(RuntimeType.iBoolean, leftType, rightType,
+                            "'or'");
 
-                              pushBoolean(leftValue == 1 || rightValue == 1);
-                          }
-                          );
+                pushBoolean(leftValue == 1 || rightValue == 1);
                 break;
             case Not:
-                exec.doIt((ignore) ->
-                          {
-                              rightValue = stack.pop();
-                              rightType = runtimeTypeCache[stack.pop()];
+                rightValue = stack.pop();
+                rightType = runtimeTypeCache[stack.pop()];
 
-                              expectType(RuntimeType.iBoolean, rightType, "'not'");
+                expectType(RuntimeType.iBoolean, rightType, "'not'");
 
-                              pushBoolean(!(rightValue == 1));
-                          }
-                          );
+                pushBoolean(!(rightValue == 1));
                 break;
             case Print:
-                exec.doIt((ignore) ->
-                          {
-                              rightValue = stack.pop();
-                              rightType = runtimeTypeCache[stack.pop()];
-                              switch(rightType) {
-                              case iInteger:
-                                  System.out.print(rightValue);
-                                  break;
-                              case iBoolean:
-                                  System.out.print(rightValue == 1);
-                                  break;
-                              case iString:
-                                  System.out.print(getString(rightValue));
-                                  break;
-                              default:
-                                  System.err.println("don't now how to print type " +
-                                                     rightType);
-                                  break;
-                              }
-                              System.out.print(" ");
-                          }
-                          );
+                rightValue = stack.pop();
+                rightType = runtimeTypeCache[stack.pop()];
+                switch(rightType) {
+                case iInteger:
+                    System.out.print(rightValue);
+                    break;
+                case iBoolean:
+                    System.out.print(rightValue == 1);
+                    break;
+                case iString:
+                    System.out.print(getString(rightValue));
+                    break;
+                default:
+                    System.err.println("don't now how to print type " +
+                                       rightType);
+                    break;
+                }
+                System.out.print(" ");
                 break;
-            case Move:
+            case Move: {
                 leftValue = code.readInteger();  // frames
                 rightValue = code.readInteger(); // offset
-                exec.doIt((ignore) ->
-                          {
-                              Integer tempFrameBase = frameBase;
-                              while(leftValue > 0){
-                                  tempFrameBase = stack.elementAt(tempFrameBase - 1);
-                                  leftValue--;
-                              }
-                              stack.setElementAt(stack.pop(),
-                                                 tempFrameBase + rightValue + 1); // value
-                              stack.setElementAt(stack.pop(),
-                                                 tempFrameBase + rightValue);     // type
-                          }
-                          );
+                Integer tempFrameBase = frameBase;
+                while(leftValue > 0){
+                    tempFrameBase = stack.elementAt(tempFrameBase - 1);
+                    leftValue--;
+                }
+                stack.setElementAt(stack.pop(),
+                                   tempFrameBase + rightValue + 1); // value
+                stack.setElementAt(stack.pop(),
+                                   tempFrameBase + rightValue);     // type
+            }
                 break;
-            case Copy:
+            case Copy: {
                 leftValue = code.readInteger();  // frames
                 rightValue = code.readInteger(); // offset
-                exec.doIt((ignore) ->
-                          {
-                              Integer tempFrameBase = frameBase;
-                              while(leftValue > 0){
-                                  tempFrameBase = stack.elementAt(tempFrameBase - 1);
-                                  leftValue--;
-                              }
-                              stack.push(stack.elementAt(tempFrameBase +
-                                                         rightValue));      // type
-                              stack.push(stack.elementAt(tempFrameBase +
-                                                         rightValue + 1));  // value
-                          }
-                          );
+                Integer tempFrameBase = frameBase;
+                while(leftValue > 0){
+                    tempFrameBase = stack.elementAt(tempFrameBase - 1);
+                    leftValue--;
+                }
+                stack.push(stack.elementAt(tempFrameBase +
+                                           rightValue));      // type
+                stack.push(stack.elementAt(tempFrameBase +
+                                           rightValue + 1));  // value
+            }
                 break;
             case PrtLn:
-                exec.doIt((ignore) ->
-                          {
-                              System.out.println();
-                          }
-                          );
+                System.out.println();
                 break;
             case Jmp:
                 leftValue = code.readInteger();
-                exec.doIt((ignore) ->
-                          {
-                              code.setFinger(leftValue);
-                          }
-                          );
+                code.setFinger(leftValue);
                 break;
             case JmpT:
                 leftValue = code.readInteger();
-                exec.doIt((ignore) ->
-                          {
-                              rightValue = stack.pop();
-                              rightType = runtimeTypeCache[stack.pop()];
-                              expectType(RuntimeType.iBoolean, rightType, "test");
-                              if(rightValue == 1) {
-                                  code.setFinger(leftValue);
-                              }
-                          }
-                          );
+                rightValue = stack.pop();
+                rightType = runtimeTypeCache[stack.pop()];
+                expectType(RuntimeType.iBoolean, rightType, "test");
+                if(rightValue == 1) {
+                    code.setFinger(leftValue);
+                }
                 break;
             case JmpF:
                 leftValue = code.readInteger();
-                exec.doIt((ignore) ->
-                          {
-                              rightValue = stack.pop();
-                              rightType = runtimeTypeCache[stack.pop()];
-                              expectType(RuntimeType.iBoolean, rightType, "test");
-                              if(rightValue == 0) {
-                                  code.setFinger(leftValue);
-                              }
-                          }
-                          );
+                rightValue = stack.pop();
+                rightType = runtimeTypeCache[stack.pop()];
+                expectType(RuntimeType.iBoolean, rightType, "test");
+                if(rightValue == 0) {
+                    code.setFinger(leftValue);
+                }
                 break;
             case Enter:
-                exec.doIt ((ignore) ->
-                           {
-                               stack.push(frameBase);
-                               frameBase = stack.size();
-                           }
-                           );
+                stack.push(frameBase);
+                frameBase = stack.size();
                 break;
             case Exit:
-                exec.doIt((ignore) ->
-                          {
-                              while(stack.size() > frameBase) {
-                                  stack.pop();
-                              }
-                              frameBase = stack.pop();
-                          }
-                          );
+                while(stack.size() > frameBase) {
+                    stack.pop();
+                }
+                frameBase = stack.pop();
                 break;
             case Locals:
                 leftValue = code.readInteger();
-                exec.doIt((ignore) ->
-                          {
-                              while(leftValue > 0) {
-                                  stack.push(0);
-                                  leftValue--;
-                              }
-                          }
-                          );
+                while(leftValue > 0) {
+                    stack.push(0);
+                    leftValue--;
+                }
                 break;
 
             case Call:
                 leftValue = code.readInteger();
-                exec.doIt((ignore) ->
-                          {
-                              code.setFinger(leftValue);  
-                          }
-                          );
+                code.setFinger(leftValue);
                 break;
 
             case Return:
-                exec.doIt((ignore) ->
-                          {
-                              leftValue = stack.elementAt(frameBase - 2);
-                              code.setFinger(leftValue);
-                          }
-                          );
+                leftValue = stack.elementAt(frameBase - 2);
+                code.setFinger(leftValue);
                 break;
 
             default:
@@ -542,7 +424,6 @@ public class AbsMach {
 
         Trace tracer = new EmptyTrace();
         int fileArg = 0;
-        Executor exec = new Exec();
 
         if(args.length == 2 || args.length == 3) {
             switch(args[0]) {
@@ -550,15 +431,16 @@ public class AbsMach {
                 tracer = new PrintTrace(System.out);
                 fileArg = 1;
                 break;
-            case "-disasm":
-                tracer = new PrintTrace(System.out);
-                exec = new NoOp();
-                fileArg = 1;
-                break;
             case "-dump":
                 tracer = new PrintTrace(new PrintStream(new File(args[1])));
                 fileArg = 2;
                 break;
+            case "-disasm": {
+                PrintStream out = new PrintStream(new File(args[1]));
+                DisAsm disAsm = new DisAsm(args[2], out);
+                disAsm.go();
+                return;
+            }
             default:
                 fileArg = 1;
                 break;
@@ -567,7 +449,7 @@ public class AbsMach {
 
         try {
             AbsMach am = new AbsMach(args[fileArg]);
-            am.go(tracer, exec);
+            am.go(tracer);
         }
         catch(RuntimeError err) {
             System.err.println("The program doesn't mean what you think it means: " +
