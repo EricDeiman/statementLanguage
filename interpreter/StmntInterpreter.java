@@ -32,7 +32,7 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
 
     @Override
     public InterpValue visitFuncDecl(StmntParser.FuncDeclContext ctx) {
-        FuncData func = new FuncData(ctx.ID(), ctx.block());
+        FuncData func = new FuncData(ctx.ID(), ctx.funcBody());
         if(functionNameSpace.containsKey(func.getInternalName())) {
             throw new RuntimeError("attempt to redefine function " + func.getName() +
                                    " near " + ctx.getStart().getLine() + ":" +
@@ -119,22 +119,25 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
     }
 
     @Override
-    public InterpValue visitReturnStmnt(StmntParser.ReturnStmntContext ctx) {
-        if(!inFunction) {
-            throw new RuntimeError("return statement not in a function near " +
-                                   ctx.getStart().getLine() + ":" +
-                                   ctx.getStart().getCharPositionInLine());
-        }
-        return visit(ctx.expression());
-    }
-
-    @Override
     public InterpValue visitBlock(StmntParser.BlockContext ctx) {
         InterpValue answer = iIntergerZero;
         environment.beginScope();
         for(StmntParser.StatementContext sctx : ctx.statement()) {
             answer = visit(sctx);
         }
+        environment.endScope();
+        return answer;
+    }
+
+    @Override
+    public InterpValue visitFuncBody(StmntParser.FuncBodyContext ctx) {
+        InterpValue answer = iIntergerZero;
+        environment.beginScope();
+        for(StmntParser.StatementContext sctx : ctx.statement()) {
+            answer = visit(sctx);
+        }
+
+        answer = visit(ctx.expression());
         environment.endScope();
         return answer;
     }

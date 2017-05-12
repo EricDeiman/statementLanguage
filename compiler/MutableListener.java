@@ -46,6 +46,17 @@ public class MutableListener extends StmntBaseListener {
     }
 
     @Override
+    public void enterFuncBody(StmntParser.FuncBodyContext ctx) {
+        currentScope = new Scope(currentScope);
+        scopes.put(ctx, currentScope);
+    }
+
+    @Override
+    public void exitFuncBody(StmntParser.FuncBodyContext ctx) {
+        currentScope = currentScope.getParent();
+    }
+
+    @Override
     public void enterAssign(StmntParser.AssignContext ctx) {
         String name = ctx.ID().getText();
         currentScope.put(name);

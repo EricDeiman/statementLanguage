@@ -88,7 +88,7 @@ public class Compile extends StmntBaseVisitor<Integer> {
             currentScope.putShadow(name);
         }
         inFunction = true;
-        visit(ctx.block());
+        visit(ctx.funcBody());
         inFunction = false;
         currentScope = currentScope.getParent();
 
@@ -207,20 +207,20 @@ public class Compile extends StmntBaseVisitor<Integer> {
         return answer;
     }
 
-    @Override
-    public Integer visitReturnStmnt(StmntParser.ReturnStmntContext ctx) {
-        if(!inFunction) {
-            throw new RuntimeError("return outside of a function near " +
-                                   ctx.getStart().getLine() + ":" +
-                                   ctx.getStart().getCharPositionInLine());
-        }
+    // @Override
+    // public Integer visitReturnStmnt(StmntParser.ReturnStmntContext ctx) {
+    //     if(!inFunction) {
+    //         throw new RuntimeError("return outside of a function near " +
+    //                                ctx.getStart().getLine() + ":" +
+    //                                ctx.getStart().getCharPositionInLine());
+    //     }
 
-        visit(ctx.expression());
+    //     visit(ctx.expression());
 
-        code.writeByte(ByteCodes.Return);
+    //     code.writeByte(ByteCodes.Return);
 
-        return 0;
-    }
+    //     return 0;
+    // }
 
     @Override
     public Integer visitBlock(StmntParser.BlockContext ctx) { 
@@ -238,6 +238,27 @@ public class Compile extends StmntBaseVisitor<Integer> {
         code.writeByte(ByteCodes.Exit);
         currentScope = currentScope.getParent();
         return 0;
+    }
+
+    @Override
+    public Integer visitFuncBody(StmntParser.FuncBodyContext ctx) {
+        currentScope = scopes.get(ctx);
+        code.writeByte(ByteCodes.Enter);
+
+        Vector<String> mutables = currentScope.getNames();
+        if(mutables.size() > 0)  {
+            code.writeByte(ByteCodes.Locals).writeInteger(mutables.size() * 2);
+        }
+
+        for(StmntParser.StatementContext sctx : ctx.statement()) {
+            visit(sctx);
+        }
+        visit(ctx.expression());
+
+        code.writeByte(ByteCodes.Return);
+        currentScope = currentScope.getParent();
+        return 0;
+        
     }
 
     @Override

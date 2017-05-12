@@ -40,8 +40,8 @@ hello(which, name1, name2) {
   return 0;
 }
 
-hello(1<2, kid1, kid2);
-hello(2<2, kid1, kid2);
+hello(kid1 < kid2, kid1, kid2);
+hello(kid1 > kid2, kid1, kid2);
 
 getTrue() {
   return true;
