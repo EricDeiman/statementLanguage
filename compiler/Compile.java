@@ -87,10 +87,10 @@ public class Compile extends StmntBaseVisitor<Integer> {
         for(String name : fun.getParameters()) {
             currentScope.putShadow(name);
         }
-
+        inFunction = true;
         visit(ctx.block());
+        inFunction = false;
         currentScope = currentScope.getParent();
-        code.writeByte(ByteCodes.Return);
 
         return 0;
     }
@@ -201,7 +201,29 @@ public class Compile extends StmntBaseVisitor<Integer> {
     }
 
     @Override
-    public Integer visitBlock(StmntParser.BlockContext ctx) {
+    public Integer visitExpressionStmnt(StmntParser.ExpressionStmntContext ctx) {
+        Integer answer = visit(ctx.expression());
+        code.writeByte(ByteCodes.Pop);
+        return answer;
+    }
+
+    @Override
+    public Integer visitReturnStmnt(StmntParser.ReturnStmntContext ctx) {
+        if(!inFunction) {
+            throw new RuntimeError("return outside of a function near " +
+                                   ctx.getStart().getLine() + ":" +
+                                   ctx.getStart().getCharPositionInLine());
+        }
+
+        visit(ctx.expression());
+
+        code.writeByte(ByteCodes.Return);
+
+        return 0;
+    }
+
+    @Override
+    public Integer visitBlock(StmntParser.BlockContext ctx) { 
         currentScope = scopes.get(ctx);
         code.writeByte(ByteCodes.Enter);
 
@@ -256,6 +278,9 @@ public class Compile extends StmntBaseVisitor<Integer> {
         }
 
         String functionReturn = labelMaker.make("functionReturn");
+
+        // make room for the return value
+        code.writeByte(ByteCodes.Push).writeByte(RuntimeType.iInteger).writeInteger(-1);
 
         // push return instruction pointer
         code.writeByte(ByteCodes.Push).writeByte(RuntimeType.iInteger);
@@ -507,4 +532,5 @@ public class Compile extends StmntBaseVisitor<Integer> {
     private Labeller labelMaker;
     private Scope currentScope;
     private Map<String, FuncMeta> functionNameSpace;
+    private Boolean inFunction = false;
 }

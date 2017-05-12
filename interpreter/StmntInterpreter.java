@@ -119,6 +119,16 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
     }
 
     @Override
+    public InterpValue visitReturnStmnt(StmntParser.ReturnStmntContext ctx) {
+        if(!inFunction) {
+            throw new RuntimeError("return statement not in a function near " +
+                                   ctx.getStart().getLine() + ":" +
+                                   ctx.getStart().getCharPositionInLine());
+        }
+        return visit(ctx.expression());
+    }
+
+    @Override
     public InterpValue visitBlock(StmntParser.BlockContext ctx) {
         InterpValue answer = iIntergerZero;
         environment.beginScope();
@@ -179,7 +189,9 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
             environment.putShadow(params.get(i), arguments.get(i));
         }
 
+        inFunction = true;
         answer = visit(fun.getBody());
+        inFunction = false;
 
         environment.endScope();
 
@@ -377,5 +389,5 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
 
     private InterpValue iIntergerZero = new InterpValue(RuntimeType.iInteger, 0);
     private InterpValue iStringNull = new InterpValue(RuntimeType.iString, "\"<null>\"");
-
+    private Boolean inFunction = false;
 }

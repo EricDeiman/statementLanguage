@@ -1,5 +1,6 @@
 hello() {
         print "Hello function world!";
+        return true;
 }
 
 print "Hello statement world!";
@@ -12,6 +13,7 @@ print "Name is" name;
 hello(name) {
   wife <- "Soma";
   print "Hello" name "and" wife;
+  return 0;
 }
 
 hello("Eric");
@@ -21,8 +23,33 @@ print "Name is" name;
 hello(name1, name2) {
   print "Hello" name1 "and" name2;
   print "Hello" name2 "and" name1;
+  return 0;
 }
 
 kid1 <- "Evan";
 kid2 <- "Neil";
 hello(kid1, kid2);
+
+hello(which, name1, name2) {
+  if(which) {
+    print "Hello" name1;
+  }
+  else {
+    print "Hello" name2;
+  }
+  return 0;
+}
+
+hello(1<2, kid1, kid2);
+hello(2<2, kid1, kid2);
+
+getTrue() {
+  return true;
+  }
+
+getFalse() {
+  return false;
+  }
+
+print "This should say true:" getTrue();
+print "This should say false:" getFalse();

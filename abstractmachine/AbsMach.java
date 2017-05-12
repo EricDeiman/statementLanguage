@@ -393,9 +393,23 @@ public class AbsMach {
                 code.setFinger(leftValue);
                 break;
 
-            case Return:
-                leftValue = stack.elementAt(frameBase - 2);
+            case Return: {
+                Integer previousFrameBase = stack.get(frameBase - 1);
+                leftValue = stack.pop();  // value
+                leftType= runtimeTypeCache[stack.pop()];  // type
+                stack.set(previousFrameBase - 4, leftValue);
+                stack.set(previousFrameBase - 5, leftType.ordinal());
+                leftValue = stack.elementAt(previousFrameBase - 2);
+
+                //                temporary
+                while(stack.size() > frameBase) {
+                    stack.pop();
+                }
+                frameBase = stack.pop();
+                // end of temporary
+
                 code.setFinger(leftValue);
+            }
                 break;
 
             default:

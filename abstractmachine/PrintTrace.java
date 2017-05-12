@@ -16,6 +16,11 @@ public class PrintTrace extends EmptyTrace {
 
     public void preInstruction(CodeBuffer code, Stack<Integer> stack, Integer frame) {
         Integer position = code.getFinger();
+        Integer index = code.getByte(position);
+        if(index >= byteCodesCache.length) {
+            System.err.println("at code position " + position + " read byte code " +
+                               index + " which isn't valid");
+        }
         ByteCodes opCode = byteCodesCache[code.getByte(position)];
         StringBuilder buffer = new StringBuilder();
         Integer operand = 0;

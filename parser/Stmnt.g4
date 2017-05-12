@@ -17,6 +17,7 @@ statement : 'print' expression+ EOS #PrintStmnt
           | 'if' ifBlock ('else' 'if' ifBlock)* ('else' block)? #IfStmnt
           | 'while' '(' test=logicExp ')' body=block  #WhileStmnt
           | expression EOS #ExpressionStmnt
+          | 'return' expression EOS #ReturnStmnt
           ;
 
 block : '{' statement*  '}'
