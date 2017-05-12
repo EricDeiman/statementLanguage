@@ -87,9 +87,7 @@ public class Compile extends StmntBaseVisitor<Integer> {
         for(String name : fun.getParameters()) {
             currentScope.putShadow(name);
         }
-        inFunction = true;
         visit(ctx.funcBody());
-        inFunction = false;
         currentScope = currentScope.getParent();
 
         return 0;
@@ -207,21 +205,6 @@ public class Compile extends StmntBaseVisitor<Integer> {
         return answer;
     }
 
-    // @Override
-    // public Integer visitReturnStmnt(StmntParser.ReturnStmntContext ctx) {
-    //     if(!inFunction) {
-    //         throw new RuntimeError("return outside of a function near " +
-    //                                ctx.getStart().getLine() + ":" +
-    //                                ctx.getStart().getCharPositionInLine());
-    //     }
-
-    //     visit(ctx.expression());
-
-    //     code.writeByte(ByteCodes.Return);
-
-    //     return 0;
-    // }
-
     @Override
     public Integer visitBlock(StmntParser.BlockContext ctx) { 
         currentScope = scopes.get(ctx);
@@ -259,21 +242,6 @@ public class Compile extends StmntBaseVisitor<Integer> {
         currentScope = currentScope.getParent();
         return 0;
         
-    }
-
-    @Override
-    public Integer visitArithE(StmntParser.ArithEContext ctx) {
-        return visit(ctx.arithExp());
-    }
-
-    @Override
-    public Integer visitStringE(StmntParser.StringEContext ctx) {
-        return visit(ctx.stringExp());
-    }
-
-    @Override
-    public Integer visitLogicE(StmntParser.LogicEContext ctx) {
-        return visit(ctx.logicExp());
     }
 
     @Override
@@ -326,11 +294,6 @@ public class Compile extends StmntBaseVisitor<Integer> {
         code.writeByte(ByteCodes.Pop); // get rid of return instruction pointer
 
         return 0;
-    }
-
-    @Override
-    public Integer visitArithGroup(StmntParser.ArithGroupContext ctx) {
-        return visit(ctx.arithExp());
     }
 
     @Override
@@ -420,11 +383,6 @@ public class Compile extends StmntBaseVisitor<Integer> {
     }
 
     @Override
-    public Integer visitLogicGroup(StmntParser.LogicGroupContext ctx ) {
-        return visit(ctx.logicExp());
-    }
-
-    @Override
     public Integer visitLogicNot(StmntParser.LogicNotContext ctx) {
         visit(ctx.logicExp());
         code.writeByte(ByteCodes.Not);
@@ -445,21 +403,6 @@ public class Compile extends StmntBaseVisitor<Integer> {
         visit(ctx.right);
         code.writeByte(ByteCodes.Or);
         return 0;
-    }
-
-    @Override
-    public Integer visitLogicIntRel(StmntParser.LogicIntRelContext ctx) {
-        return visit(ctx.intRelExp());
-    }
-
-    @Override
-    public Integer visitLogicStringRel(StmntParser.LogicStringRelContext ctx) {
-        return visit(ctx.stringRelExp());
-    }
-
-    @Override
-    public Integer visitLogicLit(StmntParser.LogicLitContext ctx) {
-        return visit(ctx.boolLit());
     }
 
     @Override
@@ -553,5 +496,4 @@ public class Compile extends StmntBaseVisitor<Integer> {
     private Labeller labelMaker;
     private Scope currentScope;
     private Map<String, FuncMeta> functionNameSpace;
-    private Boolean inFunction = false;
 }

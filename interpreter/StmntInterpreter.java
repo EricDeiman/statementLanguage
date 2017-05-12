@@ -114,11 +114,6 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
     }
 
     @Override
-    public InterpValue visitExpressionStmnt(StmntParser.ExpressionStmntContext ctx) {
-        return visit(ctx.expression());
-    }
-
-    @Override
     public InterpValue visitBlock(StmntParser.BlockContext ctx) {
         InterpValue answer = iIntergerZero;
         environment.beginScope();
@@ -140,21 +135,6 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
         answer = visit(ctx.expression());
         environment.endScope();
         return answer;
-    }
-
-    @Override
-    public InterpValue visitArithE(StmntParser.ArithEContext ctx) {
-        return visit(ctx.arithExp());
-    }
-
-    @Override
-    public InterpValue visitStringE(StmntParser.StringEContext ctx) {
-        return visit(ctx.stringExp());
-    }
-
-    @Override
-    public InterpValue visitLogicE(StmntParser.LogicEContext ctx) {
-        return visit(ctx.logicExp());
     }
 
     @Override
@@ -251,11 +231,6 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
     }
 
     @Override
-    public InterpValue visitLogicGroup(StmntParser.LogicGroupContext ctx ) {
-        return visit(ctx.logicExp());
-    }
-
-    @Override
     public InterpValue visitLogicNot(StmntParser.LogicNotContext ctx) {
         InterpValue result = visit(ctx.logicExp());
         expectType(RuntimeType.iBoolean, result, ctx.getStart());
@@ -276,21 +251,6 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
         InterpValue iright = visit(ctx.right);
         expectTypes(RuntimeType.iBoolean, ileft, iright, ctx.getStart());
         return ileft.doLogic("or", iright);
-    }
-
-    @Override
-    public InterpValue visitLogicIntRel(StmntParser.LogicIntRelContext ctx) {
-        return visit(ctx.intRelExp());
-    }
-
-    @Override
-    public InterpValue visitLogicStringRel(StmntParser.LogicStringRelContext ctx) {
-        return visit(ctx.stringRelExp());
-    }
-
-    @Override
-    public InterpValue visitLogicLit(StmntParser.LogicLitContext ctx) {
-        return visit(ctx.boolLit());
     }
 
     @Override
