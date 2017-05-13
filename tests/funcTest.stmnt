@@ -53,3 +53,31 @@ getFalse() {
 
 print "This should say true:" getTrue();
 print "This should say false:" getFalse();
+
+recFib(num) {
+  answer <- 1;
+  if(num > 2) {
+         answer <- recFib(num - 1) + recFib(num - 2);
+  }
+  return answer;
+}
+
+itrFib(num) {
+  answer-1 <- 1;
+  answer-2 <- 1;
+  count <- 2;
+  while(count < num) {
+    temp <- answer-1;
+    answer-1 <- answer-1 + answer-2;
+    answer-2 <- temp;
+    count <- count + 1;
+  }
+
+  return answer-1;
+}
+
+answerRec <- recFib(8);
+answerItr <- itrFib(8);
+
+print "fib(9) = " recFib(9);
+print "Does recFib(8) ?= itrFib(8)?" answerRec ?= answerItr;

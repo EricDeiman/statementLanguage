@@ -31,10 +31,10 @@ ifBlock : '(' test=logicExp  ')' body=block
 expression : arithExp #ArithE
            | stringExp #StringE
            | logicExp #LogicE
-           | ID '(' (expression (',' expression)* )? ')' #FuncCall
            ;
 
-arithExp : '(' arithExp ')' #ArithGroup
+arithExp : ID '(' (expression (',' expression)* )? ')' #FuncCall
+         | '(' arithExp ')' #ArithGroup
          | <assoc=right> left=arithExp '^' right=arithExp #Power
          | left=arithExp op=('*'|'div'|'rem') right=arithExp #Mult
          | left=arithExp op=('+'|'-') right=arithExp #Add
