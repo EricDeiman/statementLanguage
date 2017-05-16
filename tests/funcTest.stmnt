@@ -81,3 +81,23 @@ answerItr <- itrFib(8);
 
 print "fib(9) = " recFib(9);
 print "Does recFib(8) ?= itrFib(8)?" answerRec ?= answerItr;
+
+
+fnNot(value) {
+  if(value) {
+    print "true -> false";
+    return false;
+  }
+  else {
+    print "false -> true";
+    return true;
+ }
+}
+
+result <- fnNot(true);
+if(result) {
+  print "I see true";
+}
+else {
+  print "I see false";
+}

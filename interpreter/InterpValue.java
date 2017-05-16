@@ -16,6 +16,7 @@ public class InterpValue {
     public InterpValue( RuntimeType type, Object value) {
         this.type = type;
         this.value = value;
+        this.fromReturn = false;
     }
 
     public RuntimeType getType() {
@@ -173,6 +174,15 @@ public class InterpValue {
         return value.toString();
     }
 
+    public Boolean getFromReturn() {
+        return fromReturn;
+    }
+
+    public void setFromReturn(Boolean b) {
+        fromReturn = b;
+    }
+
     private RuntimeType type;
     private Object value;
+    private Boolean fromReturn;
 }

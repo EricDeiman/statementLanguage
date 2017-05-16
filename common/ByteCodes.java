@@ -31,4 +31,5 @@ public enum ByteCodes {
     Locals, // 0x1b   // reserve parameter number of stack slots
     Call,   // 0x1c   // call a function at the address in the parameter
     Return, // 0x1d   // return from a function call
+    SetRtn, // 0x1e   // set top of stack as return value
 }

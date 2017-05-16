@@ -5,11 +5,11 @@ import java.util.Vector;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import parser.StmntParser.FuncBodyContext;
+import parser.StmntParser.BlockContext;
 
 public class FuncData {
 
-    public FuncData(List<TerminalNode> names, FuncBodyContext body) {
+    public FuncData(List<TerminalNode> names, BlockContext body) {
         this.body = body;
         this.name = names.remove(0).getText();
         parameters = new Vector<String>();
@@ -33,12 +33,12 @@ public class FuncData {
         return parameters;
     }
 
-    public FuncBodyContext getBody() {
+    public BlockContext getBody() {
         return body;
     }
 
     private String name;
     private List<String> parameters;
-    private FuncBodyContext body;
+    private BlockContext body;
     private String internalName;
 }

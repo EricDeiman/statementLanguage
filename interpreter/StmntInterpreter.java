@@ -32,7 +32,7 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
 
     @Override
     public InterpValue visitFuncDecl(StmntParser.FuncDeclContext ctx) {
-        FuncData func = new FuncData(ctx.ID(), ctx.funcBody());
+        FuncData func = new FuncData(ctx.ID(), ctx.block());
         if(functionNameSpace.containsKey(func.getInternalName())) {
             throw new RuntimeError("attempt to redefine function " + func.getName() +
                                    " near " + ctx.getStart().getLine() + ":" +
@@ -114,25 +114,23 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
     }
 
     @Override
+    public InterpValue visitReturnStmnt(StmntParser.ReturnStmntContext ctx) {
+        InterpValue answer = visit(ctx.expression());
+        seenReturn = true;
+        answer.setFromReturn(true);
+        return answer;
+    }
+
+    @Override
     public InterpValue visitBlock(StmntParser.BlockContext ctx) {
         InterpValue answer = iIntergerZero;
         environment.beginScope();
         for(StmntParser.StatementContext sctx : ctx.statement()) {
             answer = visit(sctx);
+            if(answer.getFromReturn()) {
+                break;
+            }
         }
-        environment.endScope();
-        return answer;
-    }
-
-    @Override
-    public InterpValue visitFuncBody(StmntParser.FuncBodyContext ctx) {
-        InterpValue answer = iIntergerZero;
-        environment.beginScope();
-        for(StmntParser.StatementContext sctx : ctx.statement()) {
-            answer = visit(sctx);
-        }
-
-        answer = visit(ctx.expression());
         environment.endScope();
         return answer;
     }
@@ -172,9 +170,14 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
             environment.putShadow(params.get(i), arguments.get(i));
         }
 
-        inFunction = true;
+        seenReturn = false;
         answer = visit(fun.getBody());
-        inFunction = false;
+
+        if(!seenReturn) {
+            throw new RuntimeError("function " + name + " has no return statement");
+        }
+
+        seenReturn = false;
 
         environment.endScope();
 
@@ -352,5 +355,5 @@ public class StmntInterpreter extends StmntBaseVisitor<InterpValue> {
 
     private InterpValue iIntergerZero = new InterpValue(RuntimeType.iInteger, 0);
     private InterpValue iStringNull = new InterpValue(RuntimeType.iString, "\"<null>\"");
-    private Boolean inFunction = false;
+    private Boolean seenReturn = false;
 }

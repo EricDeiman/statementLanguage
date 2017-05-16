@@ -67,6 +67,8 @@ public class AbsMach {
     public Integer go(Trace trace) {
         stack.push(1);
         frameBase = 1;
+        Integer returnValue = 0;
+        Integer returnType = 0;
 
         trace.preProgram(code, stack, frameBase);
 
@@ -395,8 +397,8 @@ public class AbsMach {
 
             case Return: {
                 Integer previousFrameBase = stack.get(frameBase - 1);
-                leftValue = stack.pop();  // value
-                leftType= runtimeTypeCache[stack.pop()];  // type
+                leftValue = returnValue;  // value
+                leftType= runtimeTypeCache[returnType];  // type
                 stack.set(previousFrameBase - 4, leftValue);
                 stack.set(previousFrameBase - 5, leftType.ordinal());
                 leftValue = stack.elementAt(previousFrameBase - 2);
@@ -410,6 +412,11 @@ public class AbsMach {
 
                 code.setFinger(leftValue);
             }
+                break;
+
+            case SetRtn:
+                returnValue = stack.pop();
+                returnType = stack.pop();
                 break;
 
             default:

@@ -82,12 +82,19 @@ public class Compile extends StmntBaseVisitor<Integer> {
         functionNameSpace.put(fun.getInternalName(), fun);
         where.put(fun.getLabel(), code.getFinger());
 
+        String functionReturnLabel = labelMaker.make(fun.getInternalName() + "Return");
+        currentFunctionReturnLabel = functionReturnLabel;
+
         currentScope = scopes.get(ctx);
 
         for(String name : fun.getParameters()) {
             currentScope.putShadow(name);
         }
-        visit(ctx.funcBody());
+        visit(ctx.block());
+
+        where.put(functionReturnLabel, code.getFinger());
+        code.writeByte(ByteCodes.Return);
+        currentFunctionReturnLabel = null;
         currentScope = currentScope.getParent();
 
         return 0;
@@ -209,6 +216,7 @@ public class Compile extends StmntBaseVisitor<Integer> {
     public Integer visitBlock(StmntParser.BlockContext ctx) { 
         currentScope = scopes.get(ctx);
         code.writeByte(ByteCodes.Enter);
+        blockDepth++;
 
         Vector<String> mutables = currentScope.getNames();
         if(mutables.size() > 0)  {
@@ -218,31 +226,47 @@ public class Compile extends StmntBaseVisitor<Integer> {
         for(StmntParser.StatementContext sctx : ctx.statement()) {
             visit(sctx);
         }
+
+        blockDepth--;
         code.writeByte(ByteCodes.Exit);
         currentScope = currentScope.getParent();
         return 0;
     }
 
     @Override
-    public Integer visitFuncBody(StmntParser.FuncBodyContext ctx) {
-        currentScope = scopes.get(ctx);
-        code.writeByte(ByteCodes.Enter);
-
-        Vector<String> mutables = currentScope.getNames();
-        if(mutables.size() > 0)  {
-            code.writeByte(ByteCodes.Locals).writeInteger(mutables.size() * 2);
-        }
-
-        for(StmntParser.StatementContext sctx : ctx.statement()) {
-            visit(sctx);
-        }
+    public Integer visitReturnStmnt(StmntParser.ReturnStmntContext ctx) {
         visit(ctx.expression());
-
-        code.writeByte(ByteCodes.Return);
-        currentScope = currentScope.getParent();
+        code.writeByte(ByteCodes.SetRtn);
+        if(blockDepth > 1) {
+            for(Integer exits = blockDepth - 1; exits > 0; exits--) {
+                code.writeByte(ByteCodes.Exit);
+            }
+        }
+        code.writeByte(ByteCodes.Jmp);
+        backPatches.addBackPatch(currentFunctionReturnLabel, code.getFinger());
+        code.writeInteger(0);
         return 0;
-        
     }
+
+    // @Override
+    // public Integer visitFuncBody(StmntParser.FuncBodyContext ctx) {
+    //     currentScope = scopes.get(ctx);
+    //     code.writeByte(ByteCodes.Enter);
+
+    //     Vector<String> mutables = currentScope.getNames();
+    //     if(mutables.size() > 0)  {
+    //         code.writeByte(ByteCodes.Locals).writeInteger(mutables.size() * 2);
+    //     }
+
+    //     for(StmntParser.StatementContext sctx : ctx.statement()) {
+    //         visit(sctx);
+    //     }
+    //     visit(ctx.expression());
+
+    //     currentScope = currentScope.getParent();
+    //     return 0;
+        
+    // }
 
     @Override
     public Integer visitFuncCall(StmntParser.FuncCallContext ctx) {
@@ -266,14 +290,14 @@ public class Compile extends StmntBaseVisitor<Integer> {
                                    args.size());
         }
 
-        String functionReturn = labelMaker.make("functionReturn");
+        String functionExit = labelMaker.make("functionExit");
 
         // make room for the return value
         code.writeByte(ByteCodes.Push).writeByte(RuntimeType.iInteger).writeInteger(-1);
 
         // push return instruction pointer
         code.writeByte(ByteCodes.Push).writeByte(RuntimeType.iInteger);
-        backPatches.addBackPatch(functionReturn, code.getFinger());
+        backPatches.addBackPatch(functionExit, code.getFinger());
         code.writeInteger(0);
 
         code.writeByte(ByteCodes.Enter);
@@ -289,7 +313,7 @@ public class Compile extends StmntBaseVisitor<Integer> {
         backPatches.addBackPatch(fun.getLabel(), code.getFinger());
         code.writeInteger(0);
 
-        where.put(functionReturn, code.getFinger());
+        where.put(functionExit, code.getFinger());
         code.writeByte(ByteCodes.Exit);
         code.writeByte(ByteCodes.Pop); // get rid of return instruction pointer
 
@@ -496,4 +520,6 @@ public class Compile extends StmntBaseVisitor<Integer> {
     private Labeller labelMaker;
     private Scope currentScope;
     private Map<String, FuncMeta> functionNameSpace;
+    private String currentFunctionReturnLabel;
+    private Integer blockDepth = 0;
 }
