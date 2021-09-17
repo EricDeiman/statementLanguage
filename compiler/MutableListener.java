@@ -64,4 +64,6 @@ public class MutableListener extends StmntBaseListener {
 
     private ParseTreeProperty<Scope> scopes;
     private Scope currentScope;
+    Boolean inFunction = false;
+    Boolean seenReturn = false;
 }
